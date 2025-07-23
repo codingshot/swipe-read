@@ -219,6 +219,10 @@ export const ReadMode = () => {
     changeFeeds(feedIds);
   };
 
+  const handleSwitchToSingleFeed = (feedId: string) => {
+    changeFeeds([feedId]);
+  };
+
   const handleViewReadStories = () => {
     // TODO: Implement read stories view
     console.log('View read stories:', readArticles);
@@ -455,25 +459,34 @@ export const ReadMode = () => {
         {/* Centered card container */}
         <div className="relative w-full max-w-sm mx-auto flex items-center justify-center">
           <div className="relative w-full h-[500px] sm:h-[600px]">
-            {unreadArticles.slice(currentIndex, currentIndex + 3).map((article, index) => (
-              <SwipeCard
-                key={article.id}
-                item={article}
-                onSwipe={handleSwipe}
-                onShare={handleShare}
-                onSpeak={speak}
-                onSaveForLater={handleSaveForLater}
-                data-card-index={index}
-                className={cn(
-                  "absolute inset-0 transition-all duration-300 newspaper-enter",
-                  index === 0 ? "z-30" : index === 1 ? "z-20" : "z-10"
-                )}
-                style={{
-                  transform: `translateY(${index * 4}px) scale(${1 - index * 0.02})`,
-                  opacity: 1 - index * 0.1
-                }}
-              />
-            ))}
+            {unreadArticles.slice(currentIndex, currentIndex + 3).map((article, index) => {
+              // Simple approach: use first selected feed as default for display
+              // In a real implementation, you'd track which feed each article came from
+              const displayFeed = feeds.find(feed => selectedFeeds.includes(feed.id));
+              
+              return (
+                <SwipeCard
+                  key={article.id}
+                  item={article}
+                  feedName={displayFeed?.name}
+                  feedId={displayFeed?.id}
+                  onSwipe={handleSwipe}
+                  onShare={handleShare}
+                  onSpeak={speak}
+                  onSaveForLater={handleSaveForLater}
+                  onSwitchToFeed={handleSwitchToSingleFeed}
+                  data-card-index={index}
+                  className={cn(
+                    "absolute inset-0 transition-all duration-300 newspaper-enter",
+                    index === 0 ? "z-30" : index === 1 ? "z-20" : "z-10"
+                  )}
+                  style={{
+                    transform: `translateY(${index * 4}px) scale(${1 - index * 0.02})`,
+                    opacity: 1 - index * 0.1
+                  }}
+                />
+              );
+            })}
           </div>
         </div>
       </div>

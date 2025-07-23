@@ -30,20 +30,26 @@ interface NewsItem {
 }
 interface SwipeCardProps {
   item: NewsItem;
+  feedName?: string;
+  feedId?: string;
   onSwipe: (direction: 'left' | 'right', item: NewsItem) => void;
   onShare: (item: NewsItem) => void;
   onSpeak: (text: string) => void;
   onSaveForLater?: (item: NewsItem) => void;
+  onSwitchToFeed?: (feedId: string) => void;
   'data-card-index'?: number;
   className?: string;
   style?: React.CSSProperties;
 }
 export const SwipeCard = ({
   item,
+  feedName,
+  feedId,
   onSwipe,
   onShare,
   onSpeak,
   onSaveForLater,
+  onSwitchToFeed,
   'data-card-index': dataCardIndex,
   className,
   style
@@ -214,32 +220,50 @@ export const SwipeCard = ({
             </p>
 
 
-            {/* Byline with Twitter info */}
+            {/* Byline with Twitter info and Feed Tag */}
             {item.author.length > 0 && <div className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4 font-sans uppercase tracking-wide border-t border-border pt-2">
-                <div className="flex items-center gap-2">
-                  <span>BY </span>
-                  <span className="flex items-center gap-1">
-                    {item.author.map((author, index) => <span key={index}>
-                        {isTwitterSource ? <button onClick={e => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    // Try to extract Twitter handle from author name or create search URL
-                    const twitterHandle = author.name.replace('@', '');
-                    const twitterUrl = author.name.startsWith('@') ? `https://twitter.com/${twitterHandle}` : `https://twitter.com/search?q=${encodeURIComponent(author.name)}`;
-                    window.open(twitterUrl, '_blank');
-                  }} className="hover:text-foreground transition-colors underline cursor-pointer">
-                            {author.name}
-                          </button> : <span>{author.name}</span>}
-                        {index < item.author.length - 1 && ', '}
-                      </span>)}
-                  </span>
-                  {isTwitterSource && <Button variant="ghost" size="sm" onClick={e => {
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <span>BY </span>
+                    <span className="flex items-center gap-1 flex-1 min-w-0">
+                      {item.author.map((author, index) => <span key={index} className="truncate">
+                          {isTwitterSource ? <button onClick={e => {
                       e.preventDefault();
                       e.stopPropagation();
-                      window.open(item.link, '_blank');
-                    }} className="px-1 py-0 h-auto text-muted-foreground hover:text-foreground" title="Open on Twitter/X">
-                      <Twitter className="w-3 h-3" />
-                    </Button>}
+                      // Try to extract Twitter handle from author name or create search URL
+                      const twitterHandle = author.name.replace('@', '');
+                      const twitterUrl = author.name.startsWith('@') ? `https://twitter.com/${twitterHandle}` : `https://twitter.com/search?q=${encodeURIComponent(author.name)}`;
+                      window.open(twitterUrl, '_blank');
+                    }} className="hover:text-foreground transition-colors underline cursor-pointer truncate">
+                              {author.name}
+                            </button> : <span className="truncate">{author.name}</span>}
+                          {index < item.author.length - 1 && ', '}
+                        </span>)}
+                    </span>
+                    {isTwitterSource && <Button variant="ghost" size="sm" onClick={e => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        window.open(item.link, '_blank');
+                      }} className="px-1 py-0 h-auto text-muted-foreground hover:text-foreground flex-shrink-0" title="Open on Twitter/X">
+                        <Twitter className="w-3 h-3" />
+                      </Button>}
+                  </div>
+                  
+                  {/* Feed Tag */}
+                  {feedName && feedId && onSwitchToFeed && (
+                    <Badge 
+                      variant="outline" 
+                      className="text-xs border-primary/50 bg-primary/10 hover:bg-primary/20 cursor-pointer transition-colors flex-shrink-0"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onSwitchToFeed(feedId);
+                      }}
+                      title={`Switch to ${feedName} feed`}
+                    >
+                      {feedName}
+                    </Badge>
+                  )}
                 </div>
               </div>}
 
