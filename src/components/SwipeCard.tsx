@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Heart, X, ExternalLink, Share2, Volume2, Clock, Eye, Bookmark, Twitter, BookmarkPlus } from 'lucide-react';
+import { Heart, X, ExternalLink, Share2, Volume2, Clock, Eye, Bookmark, BookmarkPlus, Twitter } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTypingAnimation } from '@/hooks/useTypingAnimation';
 
@@ -254,19 +254,6 @@ export const SwipeCard = ({
               {titleAnimation.isComplete && !descriptionAnimation.isComplete && <span className="animate-pulse">|</span>}
             </p>
 
-            {/* Tags section */}
-            <div className="flex flex-wrap gap-1 sm:gap-2 mb-3 sm:mb-4">
-              {item.category.slice(0, 3).map((cat, index) => (
-                <Badge key={index} variant="outline" className="text-xs font-sans font-medium border-2 border-border uppercase">
-                  {cat.name}
-                </Badge>
-              ))}
-              {item.category.length > 3 && (
-                <Badge variant="outline" className="text-xs text-muted-foreground border-2 border-border font-sans">
-                  +{item.category.length - 3} MORE
-                </Badge>
-              )}
-            </div>
 
             {/* Byline */}
             {item.author.length > 0 && (
@@ -276,30 +263,32 @@ export const SwipeCard = ({
             )}
 
             {/* Action buttons - newspaper style */}
-            <div className="flex items-center justify-between gap-2 border-t border-border pt-3">
+            <div className="flex items-center justify-between gap-2 border-t border-border pt-3 relative z-40 pointer-events-auto">
               <Button
                 variant="newspaper"
                 size="sm"
                 onClick={(e) => {
+                  e.preventDefault();
                   e.stopPropagation();
-                  onSpeak(item.title + '. ' + item.description);
+                  onSpeak(item.title + '. ' + getClippedDescription());
                 }}
-                className="flex items-center gap-1 text-xs flex-1 max-w-20 sm:max-w-24"
+                className="flex items-center gap-1 text-xs flex-1 max-w-20 sm:max-w-24 pointer-events-auto"
               >
                 <Volume2 className="w-3 h-3" />
                 <span className="hidden sm:inline">LISTEN</span>
               </Button>
               
-              <div className="flex gap-1">
+              <div className="flex gap-1 pointer-events-auto">
                 {onSaveForLater && (
                   <Button
                     variant="newspaper"
                     size="sm"
                     onClick={(e) => {
+                      e.preventDefault();
                       e.stopPropagation();
                       onSaveForLater(item);
                     }}
-                    className="px-2 sm:px-3"
+                    className="px-2 sm:px-3 pointer-events-auto"
                     title="Save for later"
                   >
                     <BookmarkPlus className="w-3 h-3" />
@@ -310,10 +299,11 @@ export const SwipeCard = ({
                   variant="newspaper"
                   size="sm"
                   onClick={(e) => {
+                    e.preventDefault();
                     e.stopPropagation();
                     setIsFlipped(!isFlipped);
                   }}
-                  className="px-2 sm:px-3"
+                  className="px-2 sm:px-3 pointer-events-auto"
                   title="Read full article"
                 >
                   <Eye className="w-3 h-3" />
@@ -323,10 +313,11 @@ export const SwipeCard = ({
                   variant="newspaper"
                   size="sm"
                   onClick={(e) => {
+                    e.preventDefault();
                     e.stopPropagation();
                     window.open(item.link, '_blank');
                   }}
-                  className="px-2 sm:px-3"
+                  className="px-2 sm:px-3 pointer-events-auto"
                   title="Open original"
                 >
                   <ExternalLink className="w-3 h-3" />
@@ -336,10 +327,11 @@ export const SwipeCard = ({
                   variant="newspaper"
                   size="sm"
                   onClick={(e) => {
+                    e.preventDefault();
                     e.stopPropagation();
                     onShare(item);
                   }}
-                  className="px-2 sm:px-3"
+                  className="px-2 sm:px-3 pointer-events-auto"
                   title="Share article"
                 >
                   <Share2 className="w-3 h-3" />
@@ -398,6 +390,16 @@ export const SwipeCard = ({
                   </Button>
                 </div>
               </div>
+              
+              {/* Tags section on back */}
+              <div className="flex flex-wrap gap-1 sm:gap-2 mb-4 pb-2 border-b border-border">
+                {item.category.map((cat, index) => (
+                  <Badge key={index} variant="outline" className="text-xs font-sans font-medium border-2 border-border uppercase">
+                    {cat.name}
+                  </Badge>
+                ))}
+              </div>
+              
               <div className="font-body text-sm sm:text-base text-muted-foreground leading-relaxed whitespace-pre-wrap">
                 {item.content || item.description}
               </div>

@@ -20,7 +20,7 @@ export const NavigationFeatures = ({
 }: NavigationFeaturesProps) => {
   return (
     <div className={cn(
-      "fixed left-2 bottom-20 z-30 flex flex-col gap-3",
+      "fixed left-1 sm:left-2 bottom-24 sm:bottom-20 z-30 flex flex-col gap-2 sm:gap-3",
       className
     )}>
       {/* Read Stories Button */}

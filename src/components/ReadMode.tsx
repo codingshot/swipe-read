@@ -295,7 +295,7 @@ export const ReadMode = () => {
         onViewSavedStories={handleViewSavedStories}
       />
 
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-220px)] p-2 sm:p-4 relative">
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-280px)] sm:min-h-[calc(100vh-240px)] p-4 sm:p-6 relative px-16 sm:px-20">
         {/* Demo mode indicator */}
         {timeFilter === 'demo' && (
           <div className="absolute top-2 sm:top-4 left-1/2 transform -translate-x-1/2 z-40">
@@ -337,7 +337,7 @@ export const ReadMode = () => {
         onUndo={undoLastAction}
         onBookmark={handleBookmarkAction}
         canUndo={canUndo}
-        className="fixed bottom-4 sm:bottom-6 left-0 right-0 z-50"
+        className="fixed bottom-6 sm:bottom-8 left-0 right-0 z-50 pointer-events-auto"
       />
     </div>
   );

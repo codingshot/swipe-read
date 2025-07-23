@@ -20,7 +20,7 @@ export const VerticalProgress = ({
 
   return (
     <div className={cn(
-      "fixed left-2 top-1/2 transform -translate-y-1/2 z-30 flex flex-col items-center gap-4",
+      "fixed left-1 sm:left-2 top-1/2 transform -translate-y-1/2 z-30 flex flex-col items-center gap-2 sm:gap-4",
       className
     )}>
       {/* Article Progress */}

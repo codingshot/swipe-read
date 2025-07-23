@@ -33,7 +33,7 @@ export const ComingSoonFeatures = ({ className }: ComingSoonFeaturesProps) => {
 
   return (
     <div className={cn(
-      "fixed right-2 top-1/2 transform -translate-y-1/2 z-30 flex flex-col gap-3",
+      "fixed right-1 sm:right-2 top-1/2 transform -translate-y-1/2 z-30 flex flex-col gap-2 sm:gap-3",
       className
     )}>
       {features.map((feature, index) => {
