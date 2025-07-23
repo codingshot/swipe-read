@@ -74,20 +74,7 @@ export const ReadMode = () => {
       
       // Start auto-read if enabled
       if (autoRead) {
-        // Clean the text before speaking to avoid speech errors
-        const cleanTitle = currentArticle.title
-          .replace(/<[^>]*>/g, '') // Remove HTML tags
-          .replace(/&[^;]+;/g, ' ') // Remove HTML entities
-          .replace(/\s+/g, ' ') // Normalize whitespace
-          .trim();
-        
-        const cleanDescription = currentArticle.description
-          .replace(/<[^>]*>/g, '') // Remove HTML tags
-          .replace(/&[^;]+;/g, ' ') // Remove HTML entities
-          .replace(/\s+/g, ' ') // Normalize whitespace
-          .trim();
-        
-        const textToSpeak = cleanTitle + '. ' + cleanDescription;
+        const textToSpeak = currentArticle.title + '. ' + currentArticle.description;
         if (textToSpeak.trim()) {
           speak(textToSpeak);
         }
@@ -95,9 +82,7 @@ export const ReadMode = () => {
       
       const interval = setInterval(() => {
         // Stop speaking when moving to next card
-        if (isSpeaking) {
-          stop();
-        }
+        stop();
         
         if (currentIndex < unreadArticles.length - 1) {
           setCurrentIndex(currentIndex + 1);
@@ -111,9 +96,7 @@ export const ReadMode = () => {
       return () => {
         clearInterval(interval);
         // Stop speaking when auto-play stops
-        if (isSpeaking) {
-          stop();
-        }
+        stop();
       };
     } else if (autoPlayInterval) {
       clearInterval(autoPlayInterval);

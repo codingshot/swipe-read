@@ -56,17 +56,28 @@ export const useSpeech = () => {
       return;
     }
 
-    // Stop any current speech
-    if (isSpeaking) {
-      window.speechSynthesis.cancel();
-    }
+    // Stop any current speech first
+    window.speechSynthesis.cancel();
+    setIsSpeaking(false);
+    setIsPaused(false);
+    currentUtterance.current = null;
 
     // Clean text for speech: remove URLs and HTML entities
     const cleanText = text
+      .replace(/<[^>]*>/g, '') // Remove HTML tags
       .replace(/https?:\/\/[^\s]+/g, '') // Remove URLs starting with http:// or https://
       .replace(/&[#\w]+;/g, ' ') // Remove HTML entities
       .replace(/\s+/g, ' ') // Replace multiple spaces with single space
       .trim();
+
+    if (!cleanText) {
+      toast({
+        title: "Nothing to read",
+        description: "No readable text found",
+        variant: "destructive",
+      });
+      return;
+    }
 
     const utterance = new SpeechSynthesisUtterance(cleanText);
     currentUtterance.current = utterance;
@@ -109,6 +120,7 @@ export const useSpeech = () => {
     };
 
     utterance.onerror = (event) => {
+      console.error('Speech synthesis error:', event);
       setIsSpeaking(false);
       setIsPaused(false);
       currentUtterance.current = null;
@@ -127,8 +139,13 @@ export const useSpeech = () => {
       setIsPaused(false);
     };
 
-    window.speechSynthesis.speak(utterance);
-  }, [isSpeaking, toast, selectedVoiceId]);
+    // Small delay to ensure cleanup is complete
+    setTimeout(() => {
+      if (currentUtterance.current === utterance) {
+        window.speechSynthesis.speak(utterance);
+      }
+    }, 100);
+  }, [toast, selectedVoiceId]);
 
   const pause = useCallback(() => {
     if (isSpeaking && !isPaused) {
@@ -143,13 +160,11 @@ export const useSpeech = () => {
   }, [isSpeaking, isPaused]);
 
   const stop = useCallback(() => {
-    if (isSpeaking) {
-      window.speechSynthesis.cancel();
-      setIsSpeaking(false);
-      setIsPaused(false);
-      currentUtterance.current = null;
-    }
-  }, [isSpeaking]);
+    window.speechSynthesis.cancel();
+    setIsSpeaking(false);
+    setIsPaused(false);
+    currentUtterance.current = null;
+  }, []);
 
   const toggle = useCallback(() => {
     if (isSpeaking) {
