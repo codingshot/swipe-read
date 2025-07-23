@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 interface SEOProps {
   title?: string;
   description?: string;
-  keywords?: string;
+  keywords?: string[];
   author?: string;
   ogTitle?: string;
   ogDescription?: string;
@@ -67,7 +67,7 @@ export const useSEO = ({
 
     // Update basic meta tags
     updateMetaTag('meta[name="description"]', description || '');
-    updateMetaTag('meta[name="keywords"]', keywords || '');
+    updateMetaTag('meta[name="keywords"]', Array.isArray(keywords) ? keywords.join(', ') : (keywords || ''));
     updateMetaTag('meta[name="author"]', author || '');
 
     // Update Open Graph tags

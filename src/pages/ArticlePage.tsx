@@ -70,7 +70,7 @@ export const ArticlePage = () => {
   useSEO({
     title: article ? `${article.title} | ReadMode by Curate.Fun` : undefined,
     description: article ? article.description.slice(0, 160) + (article.description.length > 160 ? '...' : '') : undefined,
-    keywords: article ? `${article.category.map(cat => cat.name).join(', ')}, news, ${article.source.title}` : undefined,
+    keywords: article ? [...article.category.map(cat => cat.name), 'news', article.source.title] : undefined,
     author: article?.author.length ? article.author.map(a => a.name).join(', ') : 'Curate.Fun',
     ogTitle: article ? article.title : undefined,
     ogDescription: article ? article.description.slice(0, 160) + (article.description.length > 160 ? '...' : '') : undefined,
