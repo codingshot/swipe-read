@@ -7,7 +7,8 @@ import { useSpeech } from '@/hooks/useSpeech';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { RefreshCw, Coffee, Zap } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { RefreshCw, Coffee, Zap, Archive, Calendar, Clock, Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export const ReadMode = () => {
@@ -170,6 +171,50 @@ export const ReadMode = () => {
                     <span className="font-bold ml-1">{dailyStats.dailyGoal}</span>
                   </div>
                 </div>
+              </div>
+            </div>
+            
+            {/* Old articles section */}
+            <div className="space-y-3">
+              <div className="border-t-2 border-border pt-4">
+                <div className="text-sm font-sans font-bold uppercase tracking-wide mb-2 flex items-center gap-2">
+                  <Archive className="w-4 h-4" />
+                  READ OLDER STORIES
+                </div>
+                <Select value="" onValueChange={changeTimeFilter}>
+                  <SelectTrigger className="w-full border-2 border-border bg-background font-sans font-bold h-10">
+                    <div className="flex items-center gap-2 text-sm uppercase tracking-wide">
+                      <Calendar className="w-4 h-4" />
+                      <SelectValue placeholder="CHOOSE TIME PERIOD" />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent className="border-2 border-border bg-background z-50">
+                    <SelectItem value="week" className="font-sans font-bold uppercase">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-3 h-3" />
+                        THIS WEEK
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="month" className="font-sans font-bold uppercase">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-3 h-3" />
+                        THIS MONTH
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="before" className="font-sans font-bold uppercase">
+                      <div className="flex items-center gap-2">
+                        <Filter className="w-3 h-3" />
+                        OLDER ARTICLES
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="all" className="font-sans font-bold uppercase">
+                      <div className="flex items-center gap-2">
+                        <Filter className="w-3 h-3" />
+                        ALL TIME
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             

@@ -39,6 +39,8 @@ export const ReadModeHeader = ({
     switch (filter) {
       case 'day': return <Clock className="w-3 h-3" />;
       case 'week': return <Calendar className="w-3 h-3" />;
+      case 'month': return <Calendar className="w-3 h-3" />;
+      case 'before': return <Filter className="w-3 h-3" />;
       case 'demo': return <Zap className="w-3 h-3" />;
       default: return <Filter className="w-3 h-3" />;
     }
@@ -47,8 +49,10 @@ export const ReadModeHeader = ({
   const getFilterLabel = (filter: TimeFilter) => {
     switch (filter) {
       case 'day': return 'Today';
-      case 'week': return 'This Week';
-      case 'all': return 'All Time';
+      case 'week': return 'Week';
+      case 'month': return 'Month';
+      case 'before': return 'Before';
+      case 'all': return 'All';
       case 'demo': return 'Demo';
       default: return filter;
     }
@@ -105,6 +109,18 @@ export const ReadModeHeader = ({
                     THIS WEEK
                   </div>
                 </SelectItem>
+                <SelectItem value="month" className="font-sans">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-3 h-3" />
+                    THIS MONTH
+                  </div>
+                </SelectItem>
+                <SelectItem value="before" className="font-sans">
+                  <div className="flex items-center gap-2">
+                    <Filter className="w-3 h-3" />
+                    OLDER
+                  </div>
+                </SelectItem>
                 <SelectItem value="all" className="font-sans">
                   <div className="flex items-center gap-2">
                     <Filter className="w-3 h-3" />
@@ -131,61 +147,38 @@ export const ReadModeHeader = ({
           </div>
         </div>
 
-        {/* Progress section with newspaper styling */}
-        <div className="border-t border-b border-border py-2 space-y-2">
-          {/* Article progress */}
-          <div className="flex items-center justify-between text-xs font-sans font-medium">
+        {/* Compact progress section */}
+        <div className="border-t border-b border-border py-2">
+          {/* Combined progress row */}
+          <div className="flex items-center justify-between text-xs font-sans font-medium mb-1">
             <span className="uppercase tracking-wide">
-              STORY {Math.min(currentIndex + 1, totalArticles)} OF {totalArticles}
+              STORY {Math.min(currentIndex + 1, totalArticles)}/{totalArticles} • READ {todayRead}/{dailyGoal}
             </span>
-            <span className="font-bold">
-              {Math.round(progressPercentage)}%
-            </span>
-          </div>
-          <div className="w-full bg-border h-1">
-            <div 
-              className="h-full bg-foreground transition-all duration-300"
-              style={{ width: `${progressPercentage}%` }}
-            />
-          </div>
-
-          {/* Daily reading goal */}
-          <div className="flex items-center justify-between text-xs font-sans font-medium pt-1">
-            <div className="flex items-center gap-1">
-              <TrendingUp className="w-3 h-3" />
-              <span className="uppercase tracking-wide">
-                DAILY: {todayRead}/{dailyGoal}
+            <div className="flex items-center gap-2">
+              {dailyProgressPercentage >= 100 && (
+                <span className="text-success font-bold">🎯</span>
+              )}
+              <span className="font-bold">
+                {Math.round(progressPercentage)}%
               </span>
             </div>
-            <span className="font-bold">
-              {Math.round(dailyProgressPercentage)}%
-            </span>
           </div>
-          <div className="w-full bg-border h-1">
-            <div 
-              className="h-full bg-success transition-all duration-300"
-              style={{ width: `${Math.min(dailyProgressPercentage, 100)}%` }}
-            />
+          
+          {/* Combined progress bars */}
+          <div className="space-y-1">
+            <div className="w-full bg-border h-1">
+              <div 
+                className="h-full bg-foreground transition-all duration-300"
+                style={{ width: `${progressPercentage}%` }}
+              />
+            </div>
+            <div className="w-full bg-border h-0.5">
+              <div 
+                className="h-full bg-success transition-all duration-300"
+                style={{ width: `${Math.min(dailyProgressPercentage, 100)}%` }}
+              />
+            </div>
           </div>
-        </div>
-
-        {/* Stats row */}
-        <div className="flex items-center justify-between pt-2 text-xs">
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-xs font-sans font-bold border-2 border-border">
-              📰 {todayRead} READ TODAY
-            </Badge>
-            {dailyProgressPercentage >= 100 && (
-              <Badge variant="secondary" className="text-xs bg-success text-white border-0 font-sans font-bold">
-                🎯 GOAL MET!
-              </Badge>
-            )}
-          </div>
-          {isAllCaughtUp && (
-            <Badge variant="secondary" className="text-xs bg-foreground text-background border-0 font-sans font-bold sm:hidden">
-              ✓ DONE
-            </Badge>
-          )}
         </div>
       </div>
     </div>

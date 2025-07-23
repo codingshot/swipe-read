@@ -34,7 +34,7 @@ interface SwipeAction {
   timestamp: number;
 }
 
-export type TimeFilter = 'day' | 'week' | 'all' | 'demo';
+export type TimeFilter = 'day' | 'week' | 'month' | 'before' | 'all' | 'demo';
 
 const RSS_API_URL = 'https://grants-rss.up.railway.app/api/items';
 const STORAGE_KEYS = {
@@ -91,6 +91,15 @@ export const useNewsData = (initialTimeFilter: TimeFilter = 'day') => {
       case 'week':
         cutoffDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
         break;
+      case 'month':
+        cutoffDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        break;
+      case 'before':
+        cutoffDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        return articlesData.filter((article: NewsItem) => {
+          const articleDate = new Date(article.date);
+          return articleDate <= cutoffDate;
+        });
       default:
         return articlesData;
     }
