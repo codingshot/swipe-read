@@ -15,7 +15,8 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { RefreshCw, Coffee, Zap, Archive, Calendar, Clock, Filter } from 'lucide-react';
+import { RefreshCw, Coffee, Zap, Archive, Calendar, Clock, Filter, TrendingUp } from 'lucide-react';
+import { MultiFeedSelector } from './MultiFeedSelector';
 import { cn } from '@/lib/utils';
 
 export const ReadMode = () => {
@@ -275,6 +276,18 @@ export const ReadMode = () => {
   }
 
   if (isAllCaughtUp) {
+    // Group read articles by selected feeds for display
+    const feedStats = selectedFeeds.map(feedId => {
+      const feed = feeds.find(f => f.id === feedId);
+      // For now, we'll show the total articles read divided by number of feeds
+      // In a real implementation, you'd track which feed each article came from
+      const articlesPerFeed = Math.floor(readArticles.length / selectedFeeds.length);
+      return {
+        feedName: feed?.name || 'Unknown Feed',
+        articleCount: articlesPerFeed
+      };
+    }).filter(stat => stat.articleCount > 0);
+
     return (
       <div className="min-h-screen bg-background">
         <ReadModeHeader
@@ -293,17 +306,40 @@ export const ReadMode = () => {
         />
         
         <div className="flex items-center justify-center min-h-[calc(100vh-140px)] p-3 sm:p-4">
-          <Card className="max-w-sm w-full p-6 sm:p-8 text-center space-y-4 sm:space-y-6 swipe-card">
+          <Card className="max-w-md w-full p-6 sm:p-8 text-center space-y-4 sm:space-y-6 swipe-card">
             <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto border-2 border-foreground bg-background flex items-center justify-center">
               <Coffee className="w-6 h-6 sm:w-8 sm:h-8 text-foreground" />
             </div>
             
-            <div className="space-y-3">
+            <div className="space-y-4">
               <h2 className="font-headline text-xl sm:text-2xl font-bold uppercase tracking-wide">ALL CAUGHT UP!</h2>
               <p className="font-body text-muted-foreground text-sm sm:text-base">
                 You've read all the latest articles from the selected time period.
               </p>
               
+              {/* Articles read by feed */}
+              {feedStats.length > 0 && (
+                <div className="border-2 border-border p-3 sm:p-4 space-y-3 bg-muted/20">
+                  <div className="text-sm font-sans font-bold uppercase tracking-wide flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4" />
+                    ARTICLES READ BY FEED
+                  </div>
+                  <div className="space-y-2">
+                    {feedStats.map((stat, index) => (
+                      <div key={index} className="flex justify-between items-center text-xs sm:text-sm">
+                        <span className="font-sans font-medium text-left truncate flex-1">
+                          {stat.feedName}:
+                        </span>
+                        <Badge variant="outline" className="ml-2 text-xs border-border">
+                          ~{stat.articleCount} article{stat.articleCount !== 1 ? 's' : ''}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Today's stats */}
               <div className="border-2 border-border p-3 sm:p-4 space-y-2 bg-muted/20">
                 <div className="text-sm font-sans font-bold uppercase tracking-wide">TODAY'S EDITION</div>
                 <div className="grid grid-cols-2 gap-2 text-xs sm:text-sm">
@@ -327,11 +363,27 @@ export const ReadMode = () => {
               </div>
             </div>
             
-            {/* Old articles section */}
+            {/* Multi-feed selector for changing feeds */}
+            <div className="space-y-3">
+              <div className="border-t-2 border-border pt-4">
+                <div className="text-sm font-sans font-bold uppercase tracking-wide mb-3 flex items-center gap-2">
+                  <Archive className="w-4 h-4" />
+                  CHANGE FEEDS
+                </div>
+                <MultiFeedSelector
+                  feeds={feeds}
+                  selectedFeeds={selectedFeeds}
+                  onFeedChange={handleFeedChange}
+                  className="w-full"
+                />
+              </div>
+            </div>
+            
+            {/* Time period selector */}
             <div className="space-y-3">
               <div className="border-t-2 border-border pt-4">
                 <div className="text-sm font-sans font-bold uppercase tracking-wide mb-2 flex items-center gap-2">
-                  <Archive className="w-4 h-4" />
+                  <Calendar className="w-4 h-4" />
                   READ OLDER STORIES
                 </div>
                 <Select value="" onValueChange={changeTimeFilter}>
