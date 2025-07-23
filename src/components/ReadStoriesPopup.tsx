@@ -110,24 +110,32 @@ export const ReadStoriesPopup = ({ readArticles, swipeActions, feeds, currentFee
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Globe className="w-4 h-4 text-muted-foreground" />
-                        <Badge variant={getFeedInfo(getSwipeAction(article.id)!).id === currentFeed ? "default" : "outline"} className="text-xs">
-                          {getFeedInfo(getSwipeAction(article.id)!).name}
-                        </Badge>
-                        {getFeedInfo(getSwipeAction(article.id)!).id !== currentFeed && (
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onSwitchToFeed(getFeedInfo(getSwipeAction(article.id)!).id);
-                            }}
-                            className="h-6 px-2 text-xs"
-                            title={`Switch to ${getFeedInfo(getSwipeAction(article.id)!).name} feed`}
-                          >
-                            <Play className="w-3 h-3 mr-1" />
-                            Read More
-                          </Button>
-                        )}
+                        {(() => {
+                          const action = getSwipeAction(article.id);
+                          const feedInfo = action ? getFeedInfo(action) : { id: currentFeed, name: 'Unknown Feed' };
+                          return (
+                            <>
+                              <Badge variant={feedInfo.id === currentFeed ? "default" : "outline"} className="text-xs">
+                                {feedInfo.name}
+                              </Badge>
+                              {feedInfo.id !== currentFeed && (
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onSwitchToFeed(feedInfo.id);
+                                  }}
+                                  className="h-6 px-2 text-xs"
+                                  title={`Switch to ${feedInfo.name} feed`}
+                                >
+                                  <Play className="w-3 h-3 mr-1" />
+                                  Read More
+                                </Button>
+                              )}
+                            </>
+                          );
+                        })()}
                       </div>
                       <div className="text-xs text-muted-foreground">
                         {formatTimeAgo(article.date)}
@@ -239,34 +247,42 @@ export const ReadStoriesPopup = ({ readArticles, swipeActions, feeds, currentFee
                   {likedArticles.map((article) => (
                      <Card key={article.id} className="p-4 border-2 border-border hover:shadow-elevated transition-all duration-200">
                        <div className="space-y-3">
-                         {/* Header with feed info and quick switch */}
-                         <div className="flex items-center justify-between">
-                           <div className="flex items-center gap-2">
-                             <Globe className="w-4 h-4 text-muted-foreground" />
-                             <Badge variant={getFeedInfo(getSwipeAction(article.id)!).id === currentFeed ? "default" : "outline"} className="text-xs">
-                               {getFeedInfo(getSwipeAction(article.id)!).name}
-                             </Badge>
-                             {getFeedInfo(getSwipeAction(article.id)!).id !== currentFeed && (
-                               <Button 
-                                 variant="ghost" 
-                                 size="sm" 
-                                 onClick={(e) => {
-                                   e.stopPropagation();
-                                   onSwitchToFeed(getFeedInfo(getSwipeAction(article.id)!).id);
-                                 }}
-                                 className="h-6 px-2 text-xs"
-                                 title={`Switch to ${getFeedInfo(getSwipeAction(article.id)!).name} feed`}
-                               >
-                                 <Play className="w-3 h-3 mr-1" />
-                                 Read More
-                               </Button>
-                             )}
-                           </div>
-                           <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                             <Heart className="w-3 h-3 text-success fill-current" />
-                             {formatTimeAgo(article.date)}
-                           </div>
-                         </div>
+                          {/* Header with feed info and quick switch */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Globe className="w-4 h-4 text-muted-foreground" />
+                              {(() => {
+                                const action = getSwipeAction(article.id);
+                                const feedInfo = action ? getFeedInfo(action) : { id: currentFeed, name: 'Unknown Feed' };
+                                return (
+                                  <>
+                                    <Badge variant={feedInfo.id === currentFeed ? "default" : "outline"} className="text-xs">
+                                      {feedInfo.name}
+                                    </Badge>
+                                    {feedInfo.id !== currentFeed && (
+                                      <Button 
+                                        variant="ghost" 
+                                        size="sm" 
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          onSwitchToFeed(feedInfo.id);
+                                        }}
+                                        className="h-6 px-2 text-xs"
+                                        title={`Switch to ${feedInfo.name} feed`}
+                                      >
+                                        <Play className="w-3 h-3 mr-1" />
+                                        Read More
+                                      </Button>
+                                    )}
+                                  </>
+                                );
+                              })()}
+                            </div>
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Heart className="w-3 h-3 text-success fill-current" />
+                              {formatTimeAgo(article.date)}
+                            </div>
+                          </div>
 
                         {/* Title */}
                         <Link 
@@ -360,34 +376,42 @@ export const ReadStoriesPopup = ({ readArticles, swipeActions, feeds, currentFee
                   {skippedArticles.map((article) => (
                      <Card key={article.id} className="p-4 border-2 border-border hover:shadow-elevated transition-all duration-200">
                        <div className="space-y-3">
-                         {/* Header with feed info and quick switch */}
-                         <div className="flex items-center justify-between">
-                           <div className="flex items-center gap-2">
-                             <Globe className="w-4 h-4 text-muted-foreground" />
-                             <Badge variant={getFeedInfo(getSwipeAction(article.id)!).id === currentFeed ? "default" : "outline"} className="text-xs">
-                               {getFeedInfo(getSwipeAction(article.id)!).name}
-                             </Badge>
-                             {getFeedInfo(getSwipeAction(article.id)!).id !== currentFeed && (
-                               <Button 
-                                 variant="ghost" 
-                                 size="sm" 
-                                 onClick={(e) => {
-                                   e.stopPropagation();
-                                   onSwitchToFeed(getFeedInfo(getSwipeAction(article.id)!).id);
-                                 }}
-                                 className="h-6 px-2 text-xs"
-                                 title={`Switch to ${getFeedInfo(getSwipeAction(article.id)!).name} feed`}
-                               >
-                                 <Play className="w-3 h-3 mr-1" />
-                                 Read More
-                               </Button>
-                             )}
-                           </div>
-                           <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                             <X className="w-3 h-3 text-destructive" />
-                             {formatTimeAgo(article.date)}
-                           </div>
-                         </div>
+                          {/* Header with feed info and quick switch */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Globe className="w-4 h-4 text-muted-foreground" />
+                              {(() => {
+                                const action = getSwipeAction(article.id);
+                                const feedInfo = action ? getFeedInfo(action) : { id: currentFeed, name: 'Unknown Feed' };
+                                return (
+                                  <>
+                                    <Badge variant={feedInfo.id === currentFeed ? "default" : "outline"} className="text-xs">
+                                      {feedInfo.name}
+                                    </Badge>
+                                    {feedInfo.id !== currentFeed && (
+                                      <Button 
+                                        variant="ghost" 
+                                        size="sm" 
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          onSwitchToFeed(feedInfo.id);
+                                        }}
+                                        className="h-6 px-2 text-xs"
+                                        title={`Switch to ${feedInfo.name} feed`}
+                                      >
+                                        <Play className="w-3 h-3 mr-1" />
+                                        Read More
+                                      </Button>
+                                    )}
+                                  </>
+                                );
+                              })()}
+                            </div>
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <X className="w-3 h-3 text-destructive" />
+                              {formatTimeAgo(article.date)}
+                            </div>
+                          </div>
 
                         {/* Title */}
                         <Link 
