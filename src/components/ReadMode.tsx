@@ -26,6 +26,7 @@ export const ReadMode = () => {
     timeFilter,
     readArticles,
     savedForLaterArticles,
+    swipeActions,
     handleSwipe,
     handleBookmark,
     saveForLater,
@@ -322,6 +323,7 @@ export const ReadMode = () => {
       {/* Navigation Features on Left Bottom */}
       <NavigationFeatures
         readArticles={readArticles}
+        swipeActions={swipeActions}
         savedCount={savedForLaterArticles.length}
         onViewSavedStories={handleViewSavedStories}
       />

@@ -188,10 +188,10 @@ export const SwipeCard = ({
     return null;
   };
 
-  const rotation = dragOffset.x * 0.2; // Increased rotation for more dramatic effect
-  const scale = isDragging ? 0.95 : 1;
-  const cardElevation = isDragging ? 20 : 0; // Much higher elevation when dragging
-  const skew = dragOffset.x * 0.05; // Add skew effect for more realistic drag
+  const rotation = dragOffset.x * 0.15;
+  const scale = isDragging ? 0.98 : 1;
+  const cardElevation = isDragging ? 16 : 0;
+  const skew = dragOffset.x * 0.03;
 
   return (
     <div
@@ -205,8 +205,9 @@ export const SwipeCard = ({
       )}
       style={{
         transform: `translate(${dragOffset.x}px, ${dragOffset.y}px) rotate(${rotation}deg) scale(${scale}) skewX(${skew}deg)`,
-        filter: `drop-shadow(0 ${cardElevation}px ${cardElevation * 2}px rgba(0,0,0,0.3)) blur(${isDragging ? 0.5 : 0}px)`,
+        filter: `drop-shadow(0 ${cardElevation}px ${cardElevation * 1.5}px rgba(0,0,0,0.2))`,
         transition: isDragging ? 'none' : 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+        willChange: 'transform, filter',
         ...style
       }}
       onMouseDown={handleMouseDown}
@@ -258,10 +259,27 @@ export const SwipeCard = ({
             </p>
 
 
-            {/* Byline */}
-            {item.author.length > 0 && (
-              <div className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4 font-sans uppercase tracking-wide border-t border-border pt-2">
-                BY {item.author.map(a => a.name).join(', ')}
+            {/* Byline and Twitter */}
+            {(item.author.length > 0 || isTwitterSource) && (
+              <div className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4 font-sans uppercase tracking-wide border-t border-border pt-2 flex items-center justify-between">
+                {item.author.length > 0 && (
+                  <span>BY {item.author.map(a => a.name).join(', ')}</span>
+                )}
+                {isTwitterSource && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      window.open(item.link, '_blank');
+                    }}
+                    className="ml-auto px-2 py-1 h-auto text-xs font-sans border-border hover:bg-accent/20"
+                  >
+                    <Twitter className="w-3 h-3 mr-1" />
+                    TWITTER
+                  </Button>
+                )}
               </div>
             )}
 
@@ -403,8 +421,37 @@ export const SwipeCard = ({
                 ))}
               </div>
               
-              <div className="font-body text-sm sm:text-base text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                {item.content || item.description}
+              <div className="space-y-4">
+                {/* Submitter info */}
+                {item.author.length > 0 && (
+                  <div className="bg-accent/10 p-3 rounded border border-border">
+                    <h4 className="font-headline text-sm font-bold uppercase tracking-wide mb-2">SUBMITTED BY</h4>
+                    <div className="space-y-1">
+                      {item.author.map((author, index) => (
+                        <div key={index} className="text-sm">
+                          <span className="font-medium">{author.name}</span>
+                          {author.link && (
+                            <Button
+                              variant="link"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.open(author.link, '_blank');
+                              }}
+                              className="p-0 h-auto ml-2 text-xs"
+                            >
+                              View Profile
+                            </Button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                <div className="font-body text-sm sm:text-base text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                  {item.content || item.description}
+                </div>
               </div>
             </div>
           </div>

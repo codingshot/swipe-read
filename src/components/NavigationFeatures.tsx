@@ -2,11 +2,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { History, BookmarkCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { NewsItem } from '@/hooks/useNewsData';
+import { NewsItem, SwipeAction } from '@/hooks/useNewsData';
 import { ReadStoriesPopup } from './ReadStoriesPopup';
 
 interface NavigationFeaturesProps {
   readArticles: NewsItem[];
+  swipeActions: SwipeAction[];
   savedCount: number;
   onViewSavedStories: () => void;
   className?: string;
@@ -14,6 +15,7 @@ interface NavigationFeaturesProps {
 
 export const NavigationFeatures = ({ 
   readArticles,
+  swipeActions,
   savedCount,
   onViewSavedStories,
   className 
@@ -25,9 +27,10 @@ export const NavigationFeatures = ({
       className
     )}>
       {/* Read Stories Button */}
-      <ReadStoriesPopup 
-        readArticles={readArticles}
-        trigger={
+        <ReadStoriesPopup 
+          readArticles={readArticles}
+          swipeActions={swipeActions}
+          trigger={
           <div className="relative group">
             <Button
               variant="newspaper"

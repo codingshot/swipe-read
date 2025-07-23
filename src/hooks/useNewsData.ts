@@ -28,7 +28,7 @@ export interface NewsItem {
   source: Source;
 }
 
-interface SwipeAction {
+export interface SwipeAction {
   itemId: string;
   action: 'like' | 'dismiss' | 'bookmark';
   timestamp: number;
