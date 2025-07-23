@@ -334,26 +334,55 @@ export const SwipeCard = ({
               <div className="space-y-4">
                 {/* Author/Tweet info */}
                 {item.author.length > 0 && <div className="bg-accent/10 p-3 rounded border border-border">
-                    <h4 className="font-headline text-sm font-bold uppercase tracking-wide mb-2">
-                      {isTwitterSource ? 'TWEETED BY' : 'SUBMITTED BY'}
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {item.author.map((author, index) => <div key={index} className="text-sm">
-                          {isTwitterSource ? <button onClick={e => {
-                      e.stopPropagation();
-                      const twitterHandle = author.name.replace('@', '');
-                      const twitterUrl = author.name.startsWith('@') ? `https://twitter.com/${twitterHandle}` : `https://twitter.com/search?q=${encodeURIComponent(author.name)}`;
-                      window.open(twitterUrl, '_blank');
-                    }} className="font-medium hover:text-primary transition-colors underline cursor-pointer">
-                              {author.name}
-                            </button> : <span className="font-medium">{author.name}</span>}
-                          {author.link && !isTwitterSource && <Button variant="link" size="sm" onClick={e => {
-                      e.stopPropagation();
-                      window.open(author.link, '_blank');
-                    }} className="p-0 h-auto ml-2 text-xs">
-                              View Profile
-                            </Button>}
-                        </div>)}
+                    <div className="space-y-2">
+                      {/* Author Information */}
+                      <div>
+                        <h4 className="font-headline text-xs font-bold uppercase tracking-wide mb-1">
+                          AUTHOR
+                        </h4>
+                        <div className="flex flex-wrap gap-1">
+                          {item.author.map((author, index) => (
+                            <div key={index} className="flex items-center gap-1">
+                              {author.link ? (
+                                <a
+                                  href={author.link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-xs font-medium hover:text-primary transition-colors underline"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  {author.name}
+                                </a>
+                              ) : (
+                                <span className="text-xs font-medium">{author.name}</span>
+                              )}
+                              {index < item.author.length - 1 && <span className="text-xs text-muted-foreground">,</span>}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Submitted By Information */}
+                      <div className="border-t border-border/50 pt-2">
+                        <h4 className="font-headline text-xs font-bold uppercase tracking-wide mb-1">
+                          {isTwitterSource ? 'SUBMITTED BY' : 'SOURCE'}
+                        </h4>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-medium">{item.source.title}</span>
+                          {isTwitterSource && (
+                            <a
+                              href={item.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-primary hover:text-primary/80 transition-colors underline flex items-center gap-1"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              View on X
+                              <Twitter className="w-3 h-3" />
+                            </a>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>}
                 
