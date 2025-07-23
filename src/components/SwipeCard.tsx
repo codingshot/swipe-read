@@ -152,7 +152,22 @@ export const SwipeCard = ({
     }
     setIsDragging(false);
   };
-  const handleCardClick = () => {
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Don't flip card if clicking on interactive elements
+    const target = e.target as HTMLElement;
+    if (
+      target.closest('button') ||
+      target.closest('a') ||
+      target.closest('[role="button"]') ||
+      target.closest('.pointer-events-auto') ||
+      target.hasAttribute('onclick') ||
+      target.tagName === 'BUTTON' ||
+      target.tagName === 'A'
+    ) {
+      return;
+    }
+
+    // Only flip if it's a small movement (not a drag)
     if (Math.abs(dragOffset.x) < 5 && Math.abs(dragOffset.y) < 5) {
       setIsFlipped(!isFlipped);
     }
