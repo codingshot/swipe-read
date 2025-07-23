@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Share2, Twitter, Facebook, Copy, Check } from 'lucide-react';
+import { Share2, Twitter, Facebook, Copy, Check, Linkedin, Instagram } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -61,6 +61,16 @@ export const ShareButton = ({ currentArticle, className }: ShareButtonProps) => 
   const handleLinkedInShare = () => {
     const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(articleUrl)}`;
     window.open(linkedinUrl, '_blank', 'width=550,height=420');
+    setIsOpen(false);
+  };
+
+  const handleInstagramShare = () => {
+    // Instagram doesn't support direct URL sharing via web, so we'll copy the link and suggest manual posting
+    handleCopyLink();
+    toast({
+      title: "Link copied for Instagram!",
+      description: "Paste this link in your Instagram story or post",
+    });
     setIsOpen(false);
   };
 
@@ -157,20 +167,18 @@ export const ShareButton = ({ currentArticle, className }: ShareButtonProps) => 
                   onClick={handleLinkedInShare}
                   className="flex items-center gap-2 text-xs border-2 border-border"
                 >
-                  <Share2 className="w-3 h-3" />
+                  <Linkedin className="w-3 h-3" />
                   LinkedIn
                 </Button>
-                {navigator.share && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleNativeShare}
-                    className="flex items-center gap-2 text-xs border-2 border-border"
-                  >
-                    <Share2 className="w-3 h-3" />
-                    More
-                  </Button>
-                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleInstagramShare}
+                  className="flex items-center gap-2 text-xs border-2 border-border"
+                >
+                  <Instagram className="w-3 h-3" />
+                  Instagram
+                </Button>
               </div>
             </div>
           </CardContent>
