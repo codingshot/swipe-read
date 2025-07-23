@@ -53,7 +53,7 @@ export const ReadMode = () => {
     changeDailyGoal,
     canUndo,
     updateSwipeAction
-  } = useNewsData('day', getCurrentFeedUrl(), selectedFeeds[0] || 'multi', getSelectedFeedUrls().length > 1 ? 'Multi-Feed' : feeds.find(f => f.id === selectedFeeds[0])?.name);
+  } = useNewsData('day', getSelectedFeedUrls(), selectedFeeds[0] || 'multi', getSelectedFeedUrls().length > 1 ? 'Multi-Feed' : feeds.find(f => f.id === selectedFeeds[0])?.name);
 
   const { speak, stop, isSpeaking } = useSpeech();
   const [isAutoPlay, setIsAutoPlay] = useState(false);
@@ -72,8 +72,23 @@ export const ReadMode = () => {
       
       // Start auto-read if enabled
       if (autoRead) {
-        const textToSpeak = currentArticle.title + '. ' + currentArticle.description;
-        speak(textToSpeak);
+        // Clean the text before speaking to avoid speech errors
+        const cleanTitle = currentArticle.title
+          .replace(/<[^>]*>/g, '') // Remove HTML tags
+          .replace(/&[^;]+;/g, ' ') // Remove HTML entities
+          .replace(/\s+/g, ' ') // Normalize whitespace
+          .trim();
+        
+        const cleanDescription = currentArticle.description
+          .replace(/<[^>]*>/g, '') // Remove HTML tags
+          .replace(/&[^;]+;/g, ' ') // Remove HTML entities
+          .replace(/\s+/g, ' ') // Normalize whitespace
+          .trim();
+        
+        const textToSpeak = cleanTitle + '. ' + cleanDescription;
+        if (textToSpeak.trim()) {
+          speak(textToSpeak);
+        }
       }
       
       const interval = setInterval(() => {

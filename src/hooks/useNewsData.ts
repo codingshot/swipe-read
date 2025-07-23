@@ -48,7 +48,7 @@ const STORAGE_KEYS = {
   DAILY_GOAL: 'read_mode_daily_goal'
 };
 
-export const useNewsData = (initialTimeFilter: TimeFilter = 'day', feedUrl?: string, currentFeedId?: string, currentFeedName?: string) => {
+export const useNewsData = (initialTimeFilter: TimeFilter = 'day', feedUrls?: string[], currentFeedId?: string, currentFeedName?: string) => {
   const [articles, setArticles] = useState<NewsItem[]>([]);
   const [allArticles, setAllArticles] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -186,22 +186,41 @@ export const useNewsData = (initialTimeFilter: TimeFilter = 'day', feedUrl?: str
   // Fetch articles from RSS API
   useEffect(() => {
     const fetchArticles = async () => {
-      if (!feedUrl) return; // Don't fetch if no feed URL provided
+      if (!feedUrls || feedUrls.length === 0) return; // Don't fetch if no feed URLs provided
       
       try {
         setLoading(true);
         setError(null);
         setLoadingMessage(getLoadingMessage(timeFilter));
 
-        const response = await fetch(feedUrl);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        // Fetch articles from all feed URLs in parallel
+        const fetchPromises = feedUrls.map(async (feedUrl) => {
+          try {
+            const response = await fetch(feedUrl);
+            if (!response.ok) {
+              console.warn(`Failed to fetch feed: ${feedUrl}, status: ${response.status}`);
+              return [];
+            }
+            const data = await response.json();
+            return Array.isArray(data) ? data : [];
+          } catch (error) {
+            console.warn(`Error fetching feed: ${feedUrl}`, error);
+            return [];
+          }
+        });
 
-        const data = await response.json();
+        const allFeedResults = await Promise.all(fetchPromises);
+        
+        // Merge all articles from different feeds
+        const mergedArticles = allFeedResults.flat();
+        
+        // Remove duplicates based on link or guid
+        const uniqueArticles = mergedArticles.filter((article, index, self) => 
+          index === self.findIndex(a => a.link === article.link || a.guid === article.guid)
+        );
         
         // Sort by date (newest first)
-        const sortedArticles = data.sort((a: NewsItem, b: NewsItem) => 
+        const sortedArticles = uniqueArticles.sort((a: NewsItem, b: NewsItem) => 
           new Date(b.date).getTime() - new Date(a.date).getTime()
         );
 
@@ -236,7 +255,7 @@ export const useNewsData = (initialTimeFilter: TimeFilter = 'day', feedUrl?: str
     };
 
     fetchArticles();
-  }, [toast, timeFilter, feedUrl, currentFeedId]);
+  }, [toast, timeFilter, JSON.stringify(feedUrls), currentFeedId]);
 
   // Change time filter
   const changeTimeFilter = async (newFilter: TimeFilter) => {
