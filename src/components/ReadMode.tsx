@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { SwipeCard } from './SwipeCard';
 import { ReadModeHeader } from './ReadModeHeader';
 import { SwipeActions } from './SwipeActions';
+import { VerticalProgress } from './VerticalProgress';
+import { ComingSoonFeatures } from './ComingSoonFeatures';
 import { useNewsData } from '@/hooks/useNewsData';
 import { useSpeech } from '@/hooks/useSpeech';
 import { Card } from '@/components/ui/card';
@@ -250,6 +252,17 @@ export const ReadMode = () => {
         onOpenSettings={() => {}}
       />
       
+      {/* Vertical Progress on Left */}
+      <VerticalProgress
+        currentIndex={currentIndex}
+        totalArticles={unreadArticles.length}
+        todayRead={dailyStats.todayRead}
+        dailyGoal={dailyStats.dailyGoal}
+      />
+
+      {/* Coming Soon Features on Right */}
+      <ComingSoonFeatures />
+
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-220px)] p-2 sm:p-4 relative">
         {/* Demo mode indicator */}
         {timeFilter === 'demo' && (

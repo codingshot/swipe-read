@@ -2,8 +2,9 @@ import { useState, useRef, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Heart, X, ExternalLink, Share2, Volume2, Clock, Eye, Bookmark } from 'lucide-react';
+import { Heart, X, ExternalLink, Share2, Volume2, Clock, Eye, Bookmark, Twitter } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTypingAnimation } from '@/hooks/useTypingAnimation';
 
 interface Author {
   link: string;
@@ -55,18 +56,39 @@ export const SwipeCard = ({
   const cardRef = useRef<HTMLDivElement>(null);
   const startPos = useRef({ x: 0, y: 0 });
 
-  const formatDate = (dateString: string) => {
+  // Typing animations
+  const titleAnimation = useTypingAnimation({ 
+    text: item.title, 
+    speed: 30, 
+    delay: 200 
+  });
+  
+  const descriptionAnimation = useTypingAnimation({ 
+    text: item.description, 
+    speed: 15, 
+    delay: titleAnimation.isComplete ? 300 : 2000 
+  });
+
+  const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMinutes / 60);
     const diffDays = Math.floor(diffHours / 24);
+    const diffWeeks = Math.floor(diffDays / 7);
+    const diffMonths = Math.floor(diffDays / 30);
 
-    if (diffHours < 1) return 'Just now';
+    if (diffMinutes < 1) return 'Just now';
+    if (diffMinutes < 60) return `${diffMinutes}m ago`;
     if (diffHours < 24) return `${diffHours}h ago`;
     if (diffDays < 7) return `${diffDays}d ago`;
-    return date.toLocaleDateString();
+    if (diffWeeks < 4) return `${diffWeeks}w ago`;
+    if (diffMonths < 12) return `${diffMonths}mo ago`;
+    return `${Math.floor(diffMonths / 12)}y ago`;
   };
+
+  const isTwitterSource = item.source.title.toLowerCase() === 'twitter' || item.link.includes('x.com') || item.link.includes('twitter.com');
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (isFlipped) return;
@@ -201,21 +223,23 @@ export const SwipeCard = ({
             <div className="flex items-center justify-between mb-3 sm:mb-4 pb-2 border-b border-border">
               <div className="flex items-center gap-1 sm:gap-2 text-muted-foreground text-xs sm:text-sm font-sans uppercase tracking-wide">
                 <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
-                {formatDate(item.date)}
+                {formatTimeAgo(item.date)}
               </div>
               <Badge variant="outline" className="text-xs font-sans font-bold uppercase border-2 border-border">
                 {item.source.title}
               </Badge>
             </div>
 
-            {/* Headline */}
-            <h2 className="font-headline text-lg sm:text-2xl font-bold text-foreground leading-tight mb-3 sm:mb-4 line-clamp-4 sm:line-clamp-3 headline-hover p-2 -m-2 transition-colors duration-150">
-              {item.title}
+            {/* Headline with typing animation */}
+            <h2 className="font-headline text-lg sm:text-2xl font-bold text-foreground leading-tight mb-3 sm:mb-4 line-clamp-4 sm:line-clamp-3 headline-hover p-2 -m-2 transition-colors duration-150 min-h-[3rem] sm:min-h-[4rem]">
+              {titleAnimation.displayedText}
+              {!titleAnimation.isComplete && <span className="animate-pulse">|</span>}
             </h2>
 
-            {/* Lead paragraph */}
-            <p className="font-body text-muted-foreground text-sm sm:text-base leading-relaxed mb-4 sm:mb-6 flex-1 line-clamp-6 sm:line-clamp-6">
-              {item.description}
+            {/* Lead paragraph with typing animation */}
+            <p className="font-body text-muted-foreground text-sm sm:text-base leading-relaxed mb-4 sm:mb-6 flex-1 line-clamp-6 sm:line-clamp-6 min-h-[6rem]">
+              {descriptionAnimation.displayedText}
+              {titleAnimation.isComplete && !descriptionAnimation.isComplete && <span className="animate-pulse">|</span>}
             </p>
 
             {/* Tags section */}
@@ -307,17 +331,45 @@ export const SwipeCard = ({
                 <h3 className="font-headline text-base sm:text-lg font-bold text-foreground uppercase tracking-wide">
                   FULL STORY
                 </h3>
-                <Button
-                  variant="newspaper"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsFlipped(false);
-                  }}
-                  className="px-2"
-                >
-                  <X className="w-3 h-3" />
-                </Button>
+                <div className="flex gap-1">
+                  {isTwitterSource && (
+                    <Button
+                      variant="newspaper"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.open(item.link, '_blank');
+                      }}
+                      className="px-2"
+                      title="Open on Twitter/X"
+                    >
+                      <Twitter className="w-3 h-3" />
+                    </Button>
+                  )}
+                  <Button
+                    variant="newspaper"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open(item.source.url, '_blank');
+                    }}
+                    className="px-2"
+                    title="Open source"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                  </Button>
+                  <Button
+                    variant="newspaper"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsFlipped(false);
+                    }}
+                    className="px-2"
+                  >
+                    <X className="w-3 h-3" />
+                  </Button>
+                </div>
               </div>
               <div className="font-body text-sm sm:text-base text-muted-foreground leading-relaxed whitespace-pre-wrap">
                 {item.content || item.description}

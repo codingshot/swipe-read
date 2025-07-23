@@ -146,40 +146,6 @@ export const ReadModeHeader = ({
             </Button>
           </div>
         </div>
-
-        {/* Compact progress section */}
-        <div className="border-t border-b border-border py-2">
-          {/* Combined progress row */}
-          <div className="flex items-center justify-between text-xs font-sans font-medium mb-1">
-            <span className="uppercase tracking-wide">
-              STORY {Math.min(currentIndex + 1, totalArticles)}/{totalArticles} • READ {todayRead}/{dailyGoal}
-            </span>
-            <div className="flex items-center gap-2">
-              {dailyProgressPercentage >= 100 && (
-                <span className="text-success font-bold">🎯</span>
-              )}
-              <span className="font-bold">
-                {Math.round(progressPercentage)}%
-              </span>
-            </div>
-          </div>
-          
-          {/* Combined progress bars */}
-          <div className="space-y-1">
-            <div className="w-full bg-border h-1">
-              <div 
-                className="h-full bg-foreground transition-all duration-300"
-                style={{ width: `${progressPercentage}%` }}
-              />
-            </div>
-            <div className="w-full bg-border h-0.5">
-              <div 
-                className="h-full bg-success transition-all duration-300"
-                style={{ width: `${Math.min(dailyProgressPercentage, 100)}%` }}
-              />
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
