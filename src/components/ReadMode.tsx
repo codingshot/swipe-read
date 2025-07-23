@@ -497,7 +497,6 @@ export const ReadMode = () => {
           onLike={handleLike}
           onDismiss={handleDismiss}
           onUndo={undoLastAction}
-          onBookmark={handleBookmarkAction}
           canUndo={canUndo}
           className="fixed bottom-6 sm:bottom-8 left-0 right-0 z-50 pointer-events-auto"
         />

@@ -1,12 +1,11 @@
 import { Button } from '@/components/ui/button';
-import { Heart, X, RotateCcw, Bookmark } from 'lucide-react';
+import { Heart, X, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface SwipeActionsProps {
   onLike: () => void;
   onDismiss: () => void;
   onUndo: () => void;
-  onBookmark: () => void;
   canUndo: boolean;
   className?: string;
 }
@@ -15,7 +14,6 @@ export const SwipeActions = ({
   onLike,
   onDismiss,
   onUndo,
-  onBookmark,
   canUndo,
   className
 }: SwipeActionsProps) => {
@@ -52,15 +50,6 @@ export const SwipeActions = ({
         <X className="w-4 h-4 sm:w-5 sm:h-5" />
       </Button>
 
-      {/* Bookmark button */}
-      <Button
-        variant="newspaper"
-        size="lg"
-        onClick={onBookmark}
-        className="h-12 w-12 sm:h-14 sm:w-14 border-primary text-primary hover:bg-primary hover:text-primary-foreground hover:scale-110 transition-all duration-200 hover:shadow-elevated active:animate-press flex-shrink-0 p-0"
-      >
-        <Bookmark className="w-4 h-4 sm:w-5 sm:h-5" />
-      </Button>
 
       {/* Like button */}
       <Button
