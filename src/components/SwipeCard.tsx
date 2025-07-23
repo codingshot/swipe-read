@@ -189,7 +189,7 @@ export const SwipeCard = ({
     willChange: 'transform, filter',
     ...style
   }} onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleEnd} onMouseLeave={handleEnd} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleEnd} onClick={handleCardClick}>
-      <Card className={cn("h-[500px] sm:h-[600px] swipe-card overflow-hidden relative animate-fade-in", isDragging ? "dragging shadow-elevated border-4" : "hover:shadow-elevated transition-all duration-200", "bg-background border-2 border-foreground")}>
+      <Card className={cn("h-[450px] sm:h-[550px] swipe-card overflow-hidden relative animate-fade-in", isDragging ? "dragging shadow-elevated border-4" : "hover:shadow-elevated transition-all duration-200", "bg-background border-2 border-foreground")}>
         {getSwipeIndicator()}
         
         <div className={cn("absolute inset-0 transition-transform duration-500 ease-out", isFlipped ? "transform rotateY-180" : "")}>
@@ -222,22 +222,33 @@ export const SwipeCard = ({
             </p>
 
 
-            {/* Byline */}
+            {/* Byline with Twitter info */}
             {item.author.length > 0 && <div className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4 font-sans uppercase tracking-wide border-t border-border pt-2">
-                <span>BY </span>
-                {item.author.map((author, index) => <span key={index}>
-                    {isTwitterSource ? <button onClick={e => {
-                e.preventDefault();
-                e.stopPropagation();
-                // Try to extract Twitter handle from author name or create search URL
-                const twitterHandle = author.name.replace('@', '');
-                const twitterUrl = author.name.startsWith('@') ? `https://twitter.com/${twitterHandle}` : `https://twitter.com/search?q=${encodeURIComponent(author.name)}`;
-                window.open(twitterUrl, '_blank');
-              }} className="hover:text-foreground transition-colors underline cursor-pointer">
-                        {author.name}
-                      </button> : <span>{author.name}</span>}
-                    {index < item.author.length - 1 && ', '}
-                  </span>)}
+                <div className="flex items-center gap-2">
+                  <span>BY </span>
+                  <span className="flex items-center gap-1">
+                    {item.author.map((author, index) => <span key={index}>
+                        {isTwitterSource ? <button onClick={e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    // Try to extract Twitter handle from author name or create search URL
+                    const twitterHandle = author.name.replace('@', '');
+                    const twitterUrl = author.name.startsWith('@') ? `https://twitter.com/${twitterHandle}` : `https://twitter.com/search?q=${encodeURIComponent(author.name)}`;
+                    window.open(twitterUrl, '_blank');
+                  }} className="hover:text-foreground transition-colors underline cursor-pointer">
+                            {author.name}
+                          </button> : <span>{author.name}</span>}
+                        {index < item.author.length - 1 && ', '}
+                      </span>)}
+                  </span>
+                  {isTwitterSource && <Button variant="ghost" size="sm" onClick={e => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      window.open(item.link, '_blank');
+                    }} className="px-1 py-0 h-auto text-muted-foreground hover:text-foreground" title="Open on Twitter/X">
+                      <Twitter className="w-3 h-3" />
+                    </Button>}
+                </div>
               </div>}
 
             {/* Action buttons - newspaper style */}
@@ -271,9 +282,13 @@ export const SwipeCard = ({
                 <Button variant="newspaper" size="sm" onClick={e => {
                 e.preventDefault();
                 e.stopPropagation();
-                window.open(item.link, '_blank');
-              }} className="px-2 sm:px-3 pointer-events-auto" title="Open original">
-                  <ExternalLink className="w-3 h-3" />
+                if (isTwitterSource) {
+                  window.open(item.link, '_blank');
+                } else {
+                  window.open(item.link, '_blank');
+                }
+              }} className="px-2 sm:px-3 pointer-events-auto" title={isTwitterSource ? "Open on Twitter/X" : "Open original"}>
+                  {isTwitterSource ? <Twitter className="w-3 h-3" /> : <ExternalLink className="w-3 h-3" />}
                 </Button>
                 
                 <Button variant="newspaper" size="sm" onClick={e => {
