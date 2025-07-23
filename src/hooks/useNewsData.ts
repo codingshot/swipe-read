@@ -26,6 +26,8 @@ export interface NewsItem {
   author: Author[];
   category: Category[];
   source: Source;
+  feedId?: string; // Track which feed this article came from
+  feedName?: string; // Track feed name for display
 }
 
 export interface SwipeAction {
@@ -48,7 +50,7 @@ const STORAGE_KEYS = {
   DAILY_GOAL: 'read_mode_daily_goal'
 };
 
-export const useNewsData = (initialTimeFilter: TimeFilter = 'day', feedUrls?: string[], currentFeedId?: string, currentFeedName?: string) => {
+export const useNewsData = (initialTimeFilter: TimeFilter = 'day', feedUrls?: string[], currentFeedId?: string, currentFeedName?: string, feedsData?: any[]) => {
   const [articles, setArticles] = useState<NewsItem[]>([]);
   const [allArticles, setAllArticles] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -194,7 +196,7 @@ export const useNewsData = (initialTimeFilter: TimeFilter = 'day', feedUrls?: st
         setLoadingMessage(getLoadingMessage(timeFilter));
 
         // Fetch articles from all feed URLs in parallel
-        const fetchPromises = feedUrls.map(async (feedUrl) => {
+        const fetchPromises = feedUrls.map(async (feedUrl, index) => {
           try {
             const response = await fetch(feedUrl);
             if (!response.ok) {
@@ -202,7 +204,20 @@ export const useNewsData = (initialTimeFilter: TimeFilter = 'day', feedUrls?: st
               return [];
             }
             const data = await response.json();
-            return Array.isArray(data) ? data : [];
+            const articles = Array.isArray(data) ? data : [];
+            
+            // Add feed info to each article if we have feeds data
+            if (feedsData && feedsData.length > 0) {
+              const feedInfo = feedsData.find(feed => feed.rssUrl === feedUrl);
+              if (feedInfo) {
+                articles.forEach((article: any) => {
+                  article.feedId = feedInfo.id;
+                  article.feedName = feedInfo.name;
+                });
+              }
+            }
+            
+            return articles;
           } catch (error) {
             console.warn(`Error fetching feed: ${feedUrl}`, error);
             return [];

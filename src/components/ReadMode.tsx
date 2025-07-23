@@ -55,7 +55,7 @@ export const ReadMode = () => {
     changeDailyGoal,
     canUndo,
     updateSwipeAction
-  } = useNewsData('day', getSelectedFeedUrls(), selectedFeeds[0] || 'multi', getSelectedFeedUrls().length > 1 ? 'Multi-Feed' : feeds.find(f => f.id === selectedFeeds[0])?.name);
+  } = useNewsData('day', getSelectedFeedUrls(), selectedFeeds[0] || 'multi', getSelectedFeedUrls().length > 1 ? 'Multi-Feed' : feeds.find(f => f.id === selectedFeeds[0])?.name, feeds);
 
   const { speak, stop, isSpeaking, availableVoices, selectedVoiceId, changeVoice } = useSpeech();
   const [isAutoPlay, setIsAutoPlay] = useState(false);
@@ -531,16 +531,12 @@ export const ReadMode = () => {
         <div className="relative w-full max-w-sm mx-auto flex items-center justify-center">
           <div className="relative w-full h-[500px] sm:h-[600px]">
             {unreadArticles.slice(currentIndex, currentIndex + 3).map((article, index) => {
-              // Simple approach: use first selected feed as default for display
-              // In a real implementation, you'd track which feed each article came from
-              const displayFeed = feeds.find(feed => selectedFeeds.includes(feed.id));
-              
               return (
                 <SwipeCard
                   key={article.id}
                   item={article}
-                  feedName={displayFeed?.name}
-                  feedId={displayFeed?.id}
+                  feedName={article.feedName || feeds.find(f => f.id === selectedFeeds[0])?.name}
+                  feedId={article.feedId || selectedFeeds[0]}
                   onSwipe={handleSwipe}
                   onShare={handleShare}
                   onSpeak={speak}
