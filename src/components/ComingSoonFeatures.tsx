@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Bookmark, MessageSquare, Upload, Bell } from 'lucide-react';
 import { ShareButton } from './ShareButton';
+import { SubmitNewsPopup } from './SubmitNewsPopup';
 import { cn } from '@/lib/utils';
 
 interface ComingSoonFeaturesProps {
@@ -45,6 +46,31 @@ export const ComingSoonFeatures = ({ currentArticle, className }: ComingSoonFeat
     )}>
       {features.map((feature, index) => {
         const Icon = feature.icon;
+        const isSubmit = feature.name === 'SUBMIT';
+        
+        if (isSubmit) {
+          return (
+            <div key={feature.name} className="relative group">
+              <SubmitNewsPopup>
+                <Button
+                  variant="newspaper"
+                  size="sm"
+                  className="w-10 h-10 p-0 hover:opacity-80 transition-opacity duration-200"
+                  title={`${feature.name} - ${feature.description}`}
+                >
+                  <Icon className="w-4 h-4" />
+                </Button>
+              </SubmitNewsPopup>
+              
+              {/* Enhanced tooltip on hover */}
+              <div className="absolute right-12 top-1/2 transform -translate-y-1/2 bg-background border-2 border-border p-3 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap z-50 shadow-elevated">
+                <div className="text-sm font-sans font-bold uppercase tracking-wide">{feature.name}</div>
+                <div className="text-xs text-muted-foreground mt-1">{feature.description}</div>
+              </div>
+            </div>
+          );
+        }
+        
         return (
           <div key={feature.name} className="relative group">
             <Button
