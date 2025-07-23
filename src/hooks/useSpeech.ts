@@ -79,72 +79,117 @@ export const useSpeech = () => {
       return;
     }
 
-    const utterance = new SpeechSynthesisUtterance(cleanText);
-    currentUtterance.current = utterance;
+    // Wait for voices to be loaded before creating utterance
+    const startSpeech = () => {
+      const utterance = new SpeechSynthesisUtterance(cleanText);
+      currentUtterance.current = utterance;
 
-    // Configure voice settings
-    utterance.rate = 0.9;
-    utterance.pitch = 1;
-    utterance.volume = 1;
+      // Configure voice settings
+      utterance.rate = 0.9;
+      utterance.pitch = 1;
+      utterance.volume = 1;
 
-    // Try to use selected voice or find a preferred voice
-    const voices = window.speechSynthesis.getVoices();
-    let selectedVoice = voices.find(voice => voice.voiceURI === selectedVoiceId);
-    
-    if (!selectedVoice) {
-      selectedVoice = voices.find(voice => 
-        voice.name.includes('Samantha') || 
-        voice.name.includes('Karen') ||    
-        voice.name.includes('Zira') ||     
-        voice.name.includes('Natural') || 
-        voice.name.includes('Neural') ||
-        voice.name.includes('Premium') ||
-        voice.name.includes('Enhanced') ||
-        (voice.lang.startsWith('en') && voice.localService)
-      ) || voices.find(voice => voice.lang.startsWith('en')) || voices[0];
-    }
+      // Try to use selected voice or find a preferred voice
+      const voices = window.speechSynthesis.getVoices();
+      let selectedVoice = voices.find(voice => voice.voiceURI === selectedVoiceId);
+      
+      if (!selectedVoice && voices.length > 0) {
+        selectedVoice = voices.find(voice => 
+          voice.name.includes('Samantha') || 
+          voice.name.includes('Karen') ||    
+          voice.name.includes('Zira') ||     
+          voice.name.includes('Natural') || 
+          voice.name.includes('Neural') ||
+          voice.name.includes('Premium') ||
+          voice.name.includes('Enhanced') ||
+          (voice.lang.startsWith('en') && voice.localService)
+        ) || voices.find(voice => voice.lang.startsWith('en')) || voices[0];
+      }
 
-    if (selectedVoice) {
-      utterance.voice = selectedVoice;
-    }
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
+      }
 
-    utterance.onstart = () => {
-      setIsSpeaking(true);
-      setIsPaused(false);
-    };
+      utterance.onstart = () => {
+        setIsSpeaking(true);
+        setIsPaused(false);
+      };
 
-    utterance.onend = () => {
-      setIsSpeaking(false);
-      setIsPaused(false);
-      currentUtterance.current = null;
-    };
+      utterance.onend = () => {
+        setIsSpeaking(false);
+        setIsPaused(false);
+        currentUtterance.current = null;
+      };
 
-    utterance.onerror = (event) => {
-      console.error('Speech synthesis error:', event);
-      setIsSpeaking(false);
-      setIsPaused(false);
-      currentUtterance.current = null;
-      toast({
-        title: "Speech error",
-        description: "Failed to read the text aloud",
-        variant: "destructive",
-      });
-    };
+      utterance.onerror = (event) => {
+        console.error('Speech synthesis error:', event);
+        setIsSpeaking(false);
+        setIsPaused(false);
+        currentUtterance.current = null;
+        
+        // Try again with default voice if error occurred
+        if (selectedVoice && voices.length > 0) {
+          const defaultVoice = voices[0];
+          const retryUtterance = new SpeechSynthesisUtterance(cleanText);
+          retryUtterance.voice = defaultVoice;
+          retryUtterance.rate = 0.9;
+          retryUtterance.pitch = 1;
+          retryUtterance.volume = 1;
+          
+          retryUtterance.onstart = () => {
+            setIsSpeaking(true);
+            setIsPaused(false);
+          };
+          
+          retryUtterance.onend = () => {
+            setIsSpeaking(false);
+            setIsPaused(false);
+            currentUtterance.current = null;
+          };
+          
+          retryUtterance.onerror = () => {
+            setIsSpeaking(false);
+            setIsPaused(false);
+            currentUtterance.current = null;
+          };
+          
+          currentUtterance.current = retryUtterance;
+          window.speechSynthesis.speak(retryUtterance);
+          return;
+        }
+      };
 
-    utterance.onpause = () => {
-      setIsPaused(true);
-    };
+      utterance.onpause = () => {
+        setIsPaused(true);
+      };
 
-    utterance.onresume = () => {
-      setIsPaused(false);
-    };
+      utterance.onresume = () => {
+        setIsPaused(false);
+      };
 
-    // Small delay to ensure cleanup is complete
-    setTimeout(() => {
       if (currentUtterance.current === utterance) {
         window.speechSynthesis.speak(utterance);
       }
-    }, 100);
+    };
+
+    // If voices are available, start immediately, otherwise wait
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length > 0) {
+      setTimeout(startSpeech, 100);
+    } else {
+      // Wait for voices to load
+      const voicesChangedHandler = () => {
+        window.speechSynthesis.removeEventListener('voiceschanged', voicesChangedHandler);
+        setTimeout(startSpeech, 100);
+      };
+      window.speechSynthesis.addEventListener('voiceschanged', voicesChangedHandler);
+      
+      // Fallback timeout
+      setTimeout(() => {
+        window.speechSynthesis.removeEventListener('voiceschanged', voicesChangedHandler);
+        startSpeech();
+      }, 2000);
+    }
   }, [toast, selectedVoiceId]);
 
   const pause = useCallback(() => {

@@ -123,7 +123,12 @@ export const ReadModeHeader = ({
               <SelectTrigger className="h-6 w-16 sm:h-8 sm:w-20 border-2 border-border bg-background text-xs">
                 <div className="flex items-center gap-1">
                   {getFilterIcon(timeFilter)}
-                  <span className="hidden sm:inline text-xs font-sans font-bold uppercase">{getFilterLabel(timeFilter)}</span>
+                  <span className="hidden sm:inline text-xs font-sans font-bold uppercase truncate">
+                    {getFilterLabel(timeFilter).length > 6 ? 
+                      `${getFilterLabel(timeFilter).slice(0, 3)}...${getFilterLabel(timeFilter).slice(-2)}` : 
+                      getFilterLabel(timeFilter)
+                    }
+                  </span>
                 </div>
               </SelectTrigger>
               <SelectContent className="border-2 border-border">
