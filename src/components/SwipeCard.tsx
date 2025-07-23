@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Heart, X, ExternalLink, Share2, Volume2, Clock } from 'lucide-react';
+import { Heart, X, ExternalLink, Share2, Volume2, Clock, Eye, Bookmark } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Author {
@@ -186,53 +186,53 @@ export const SwipeCard = ({
         )}>
           {/* Front of card */}
           <div className={cn(
-            "absolute inset-0 p-6 flex flex-col",
+            "absolute inset-0 p-4 sm:p-6 flex flex-col",
             isFlipped ? "opacity-0" : "opacity-100"
           )}>
-            {/* Header */}
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                <Clock className="w-4 h-4" />
+            {/* Header with newspaper dateline style */}
+            <div className="flex items-center justify-between mb-3 sm:mb-4 pb-2 border-b border-border">
+              <div className="flex items-center gap-1 sm:gap-2 text-muted-foreground text-xs sm:text-sm font-sans uppercase tracking-wide">
+                <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
                 {formatDate(item.date)}
               </div>
-              <Badge variant="secondary" className="text-xs">
+              <Badge variant="outline" className="text-xs font-sans font-bold uppercase border-2 border-border">
                 {item.source.title}
               </Badge>
             </div>
 
-            {/* Title */}
-            <h2 className="font-headline text-2xl font-bold text-foreground leading-tight mb-4 line-clamp-3 headline-hover p-2 -m-2 rounded transition-colors duration-150">
+            {/* Headline */}
+            <h2 className="font-headline text-lg sm:text-2xl font-bold text-foreground leading-tight mb-3 sm:mb-4 line-clamp-4 sm:line-clamp-3 headline-hover p-2 -m-2 transition-colors duration-150">
               {item.title}
             </h2>
 
-            {/* Description */}
-            <p className="font-body text-muted-foreground text-base leading-relaxed mb-6 flex-1 line-clamp-6">
+            {/* Lead paragraph */}
+            <p className="font-body text-muted-foreground text-sm sm:text-base leading-relaxed mb-4 sm:mb-6 flex-1 line-clamp-6 sm:line-clamp-6">
               {item.description}
             </p>
 
-            {/* Categories */}
-            <div className="flex flex-wrap gap-2 mb-4">
+            {/* Tags section */}
+            <div className="flex flex-wrap gap-1 sm:gap-2 mb-3 sm:mb-4">
               {item.category.slice(0, 3).map((cat, index) => (
-                <Badge key={index} variant="outline" className="text-xs">
-                  #{cat.name}
+                <Badge key={index} variant="outline" className="text-xs font-sans font-medium border-2 border-border uppercase">
+                  {cat.name}
                 </Badge>
               ))}
               {item.category.length > 3 && (
-                <Badge variant="outline" className="text-xs text-muted-foreground">
-                  +{item.category.length - 3}
+                <Badge variant="outline" className="text-xs text-muted-foreground border-2 border-border font-sans">
+                  +{item.category.length - 3} MORE
                 </Badge>
               )}
             </div>
 
-            {/* Author */}
+            {/* Byline */}
             {item.author.length > 0 && (
-              <div className="text-sm text-muted-foreground mb-4">
-                By {item.author.map(a => a.name).join(', ')}
+              <div className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4 font-sans uppercase tracking-wide border-t border-border pt-2">
+                BY {item.author.map(a => a.name).join(', ')}
               </div>
             )}
 
-            {/* Action buttons */}
-            <div className="flex items-center justify-between gap-2">
+            {/* Action buttons - newspaper style */}
+            <div className="flex items-center justify-between gap-2 border-t border-border pt-3">
               <Button
                 variant="newspaper"
                 size="sm"
@@ -240,10 +240,10 @@ export const SwipeCard = ({
                   e.stopPropagation();
                   onSpeak(item.title + '. ' + item.description);
                 }}
-                className="flex items-center gap-2 text-xs"
+                className="flex items-center gap-1 text-xs flex-1 max-w-20 sm:max-w-24"
               >
                 <Volume2 className="w-3 h-3" />
-                LISTEN
+                <span className="hidden sm:inline">LISTEN</span>
               </Button>
               
               <div className="flex gap-1">
@@ -252,9 +252,23 @@ export const SwipeCard = ({
                   size="sm"
                   onClick={(e) => {
                     e.stopPropagation();
+                    setIsFlipped(!isFlipped);
+                  }}
+                  className="px-2 sm:px-3"
+                  title="Read full article"
+                >
+                  <Eye className="w-3 h-3" />
+                </Button>
+                
+                <Button
+                  variant="newspaper"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
                     window.open(item.link, '_blank');
                   }}
-                  className="px-2"
+                  className="px-2 sm:px-3"
+                  title="Open original"
                 >
                   <ExternalLink className="w-3 h-3" />
                 </Button>
@@ -266,7 +280,8 @@ export const SwipeCard = ({
                     e.stopPropagation();
                     onShare(item);
                   }}
-                  className="px-2"
+                  className="px-2 sm:px-3"
+                  title="Share article"
                 >
                   <Share2 className="w-3 h-3" />
                 </Button>
@@ -274,16 +289,29 @@ export const SwipeCard = ({
             </div>
           </div>
 
-          {/* Back of card - Full content */}
+          {/* Back of card - Full article view */}
           <div className={cn(
-            "absolute inset-0 p-6 transform rotateY-180",
+            "absolute inset-0 p-4 sm:p-6 transform rotateY-180 bg-background",
             isFlipped ? "opacity-100" : "opacity-0"
           )}>
             <div className="h-full overflow-y-auto">
-              <h3 className="text-lg font-semibold mb-4 text-foreground">
-                Full Article
-              </h3>
-              <div className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+              <div className="flex items-center justify-between mb-4 pb-2 border-b-2 border-border">
+                <h3 className="font-headline text-base sm:text-lg font-bold text-foreground uppercase tracking-wide">
+                  FULL STORY
+                </h3>
+                <Button
+                  variant="newspaper"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsFlipped(false);
+                  }}
+                  className="px-2"
+                >
+                  <X className="w-3 h-3" />
+                </Button>
+              </div>
+              <div className="font-body text-sm sm:text-base text-muted-foreground leading-relaxed whitespace-pre-wrap">
                 {item.content || item.description}
               </div>
             </div>

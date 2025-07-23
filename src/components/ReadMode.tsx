@@ -138,31 +138,37 @@ export const ReadMode = () => {
           onOpenSettings={() => {}}
         />
         
-        <div className="flex items-center justify-center min-h-[calc(100vh-120px)] p-4">
-          <Card className="max-w-md w-full p-8 text-center space-y-6 bg-gradient-card">
-            <div className="w-16 h-16 mx-auto rounded-full bg-gradient-like flex items-center justify-center">
-              <Coffee className="w-8 h-8 text-white" />
+        <div className="flex items-center justify-center min-h-[calc(100vh-140px)] p-3 sm:p-4">
+          <Card className="max-w-sm w-full p-6 sm:p-8 text-center space-y-4 sm:space-y-6 swipe-card">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto border-2 border-foreground bg-background flex items-center justify-center">
+              <Coffee className="w-6 h-6 sm:w-8 sm:h-8 text-foreground" />
             </div>
             
             <div className="space-y-3">
-              <h2 className="text-2xl font-bold">All caught up! 🎉</h2>
-              <p className="text-muted-foreground">
-                You've read all the latest articles from the past 24 hours.
+              <h2 className="font-headline text-xl sm:text-2xl font-bold uppercase tracking-wide">ALL CAUGHT UP!</h2>
+              <p className="font-body text-muted-foreground text-sm sm:text-base">
+                You've read all the latest articles from the selected time period.
               </p>
               
-              <div className="bg-muted/50 rounded-lg p-4 space-y-2">
-                <div className="text-sm font-medium">Today's Progress</div>
-                <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>Articles read:</span>
-                  <span className="font-medium">{dailyStats.todayRead}</span>
-                </div>
-                <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>Articles liked:</span>
-                  <span className="font-medium">{dailyStats.todayLiked}</span>
-                </div>
-                <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>Articles bookmarked:</span>
-                  <span className="font-medium">{dailyStats.todayBookmarked}</span>
+              <div className="border-2 border-border p-3 sm:p-4 space-y-2 bg-muted/20">
+                <div className="text-sm font-sans font-bold uppercase tracking-wide">TODAY'S EDITION</div>
+                <div className="grid grid-cols-2 gap-2 text-xs sm:text-sm">
+                  <div className="text-left">
+                    <span className="font-sans font-medium">READ:</span>
+                    <span className="font-bold ml-1">{dailyStats.todayRead}</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="font-sans font-medium">LIKED:</span>
+                    <span className="font-bold ml-1">{dailyStats.todayLiked}</span>
+                  </div>
+                  <div className="text-left">
+                    <span className="font-sans font-medium">SAVED:</span>
+                    <span className="font-bold ml-1">{dailyStats.todayBookmarked}</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="font-sans font-medium">GOAL:</span>
+                    <span className="font-bold ml-1">{dailyStats.dailyGoal}</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -170,12 +176,13 @@ export const ReadMode = () => {
             <div className="space-y-2">
               <Button 
                 onClick={handleRefresh} 
-                className="w-full bg-gradient-primary text-white border-0"
+                variant="newspaper"
+                className="w-full"
               >
-                Check for new articles
+                CHECK FOR NEW STORIES
               </Button>
-              <p className="text-xs text-muted-foreground">
-                New articles appear throughout the day
+              <p className="text-xs text-muted-foreground font-sans">
+                Fresh articles appear throughout the day
               </p>
             </div>
           </Card>
@@ -198,18 +205,18 @@ export const ReadMode = () => {
         onOpenSettings={() => {}}
       />
       
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)] p-2 sm:p-4 relative">
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-220px)] p-2 sm:p-4 relative">
         {/* Demo mode indicator */}
         {timeFilter === 'demo' && (
           <div className="absolute top-2 sm:top-4 left-1/2 transform -translate-x-1/2 z-40">
-            <Badge variant="secondary" className="bg-foreground text-background border-2 border-border font-sans font-bold uppercase tracking-wide">
+            <Badge variant="secondary" className="bg-foreground text-background border-2 border-border font-sans font-bold uppercase tracking-wide text-xs">
               <Zap className="w-3 h-3 mr-1" />
-              Demo Mode
+              DEMO MODE
             </Badge>
           </div>
         )}
         {/* Card stack effect - show next cards behind current */}
-        <div className="relative w-full max-w-sm">
+        <div className="relative w-full max-w-sm mx-auto">
           {unreadArticles.slice(currentIndex, currentIndex + 3).map((article, index) => (
             <SwipeCard
               key={article.id}
@@ -222,8 +229,8 @@ export const ReadMode = () => {
                 index === 0 ? "z-30" : index === 1 ? "z-20" : "z-10"
               )}
               style={{
-                transform: `translateY(${index * 6}px) scale(${1 - index * 0.03})`,
-                opacity: 1 - index * 0.15
+                transform: `translateY(${index * 4}px) scale(${1 - index * 0.02})`,
+                opacity: 1 - index * 0.1
               }}
             />
           ))}
@@ -236,7 +243,7 @@ export const ReadMode = () => {
         onUndo={undoLastAction}
         onBookmark={handleBookmarkAction}
         canUndo={canUndo}
-        className="fixed bottom-8 left-0 right-0"
+        className="fixed bottom-4 sm:bottom-6 left-0 right-0 z-50"
       />
     </div>
   );

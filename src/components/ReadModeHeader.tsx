@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Settings, Filter, TrendingUp, PlayCircle, PauseCircle, Calendar, Clock, Zap } from 'lucide-react';
+import { Settings, Filter, TrendingUp, PlayCircle, PauseCircle, Calendar, Clock, Zap, Newspaper } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TimeFilter } from '@/hooks/useNewsData';
 
@@ -56,120 +56,134 @@ export const ReadModeHeader = ({
 
   return (
     <div className={cn("w-full bg-background border-b-2 border-border shadow-card", className)}>
-      <div className="max-w-sm mx-auto px-4 py-3 sm:py-4">
-        {/* Top row - Title and actions */}
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <h1 className="font-headline text-lg sm:text-xl font-bold text-foreground uppercase tracking-wider">
-              READ MODE
+      <div className="container max-w-full sm:max-w-sm mx-auto px-3 sm:px-4 py-2 sm:py-3">
+        {/* Newspaper masthead */}
+        <div className="flex items-center justify-between mb-2 sm:mb-3">
+          <div className="flex items-center gap-1 sm:gap-2">
+            <Newspaper className="w-4 h-4 sm:w-5 sm:h-5" />
+            <h1 className="font-headline text-sm sm:text-lg font-bold text-foreground uppercase tracking-wider">
+              DAILY READ
             </h1>
             {isAllCaughtUp && (
-              <Badge variant="secondary" className="text-xs bg-gradient-like text-white border-0">
-                All caught up! 🎉
+              <Badge variant="secondary" className="text-xs bg-foreground text-background border-0 hidden sm:inline-flex">
+                ✓ COMPLETE
               </Badge>
             )}
           </div>
           
           <div className="flex items-center gap-1">
             <Button
-              variant="ghost"
+              variant="newspaper"
               size="sm"
               onClick={onToggleAutoPlay}
-              className="h-8 w-8 p-0"
+              className="h-6 w-6 sm:h-8 sm:w-8 p-0 text-xs"
             >
               {isAutoPlay ? (
-                <PauseCircle className="w-4 h-4" />
+                <PauseCircle className="w-3 h-3 sm:w-4 sm:h-4" />
               ) : (
-                <PlayCircle className="w-4 h-4" />
+                <PlayCircle className="w-3 h-3 sm:w-4 sm:h-4" />
               )}
             </Button>
             
             <Select value={timeFilter} onValueChange={onTimeFilterChange}>
-              <SelectTrigger className="h-8 w-20 border-0 bg-transparent">
+              <SelectTrigger className="h-6 w-16 sm:h-8 sm:w-20 border-2 border-border bg-background text-xs">
                 <div className="flex items-center gap-1">
                   {getFilterIcon(timeFilter)}
-                  <span className="text-xs">{getFilterLabel(timeFilter)}</span>
+                  <span className="hidden sm:inline text-xs font-sans font-bold uppercase">{getFilterLabel(timeFilter)}</span>
                 </div>
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="day">
+              <SelectContent className="border-2 border-border">
+                <SelectItem value="day" className="font-sans">
                   <div className="flex items-center gap-2">
                     <Clock className="w-3 h-3" />
-                    Today
+                    TODAY
                   </div>
                 </SelectItem>
-                <SelectItem value="week">
+                <SelectItem value="week" className="font-sans">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-3 h-3" />
-                    This Week
+                    THIS WEEK
                   </div>
                 </SelectItem>
-                <SelectItem value="all">
+                <SelectItem value="all" className="font-sans">
                   <div className="flex items-center gap-2">
                     <Filter className="w-3 h-3" />
-                    All Time
+                    ALL TIME
                   </div>
                 </SelectItem>
-                <SelectItem value="demo">
+                <SelectItem value="demo" className="font-sans">
                   <div className="flex items-center gap-2">
                     <Zap className="w-3 h-3" />
-                    Demo Mode
+                    DEMO MODE
                   </div>
                 </SelectItem>
               </SelectContent>
             </Select>
             
             <Button
-              variant="ghost"
+              variant="newspaper"
               size="sm"
               onClick={onOpenSettings}
-              className="h-8 w-8 p-0"
+              className="h-6 w-6 sm:h-8 sm:w-8 p-0"
             >
-              <Settings className="w-4 h-4" />
+              <Settings className="w-3 h-3 sm:w-4 sm:h-4" />
             </Button>
           </div>
         </div>
 
-        {/* Progress indicators */}
-        <div className="space-y-2">
+        {/* Progress section with newspaper styling */}
+        <div className="border-t border-b border-border py-2 space-y-2">
           {/* Article progress */}
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="min-w-0 flex-1">
-              Article {Math.min(currentIndex + 1, totalArticles)} of {totalArticles}
+          <div className="flex items-center justify-between text-xs font-sans font-medium">
+            <span className="uppercase tracking-wide">
+              STORY {Math.min(currentIndex + 1, totalArticles)} OF {totalArticles}
             </span>
-            <span className="font-medium">
+            <span className="font-bold">
               {Math.round(progressPercentage)}%
             </span>
           </div>
-          <Progress 
-            value={progressPercentage} 
-            className="h-1.5 bg-muted/50"
-          />
+          <div className="w-full bg-border h-1">
+            <div 
+              className="h-full bg-foreground transition-all duration-300"
+              style={{ width: `${progressPercentage}%` }}
+            />
+          </div>
 
           {/* Daily reading goal */}
-          <div className="flex items-center gap-2 text-xs text-muted-foreground mt-3">
-            <TrendingUp className="w-3 h-3" />
-            <span className="min-w-0 flex-1">
-              Daily goal: {todayRead}/{dailyGoal} articles
-            </span>
-            <span className="font-medium">
+          <div className="flex items-center justify-between text-xs font-sans font-medium pt-1">
+            <div className="flex items-center gap-1">
+              <TrendingUp className="w-3 h-3" />
+              <span className="uppercase tracking-wide">
+                DAILY: {todayRead}/{dailyGoal}
+              </span>
+            </div>
+            <span className="font-bold">
               {Math.round(dailyProgressPercentage)}%
             </span>
           </div>
-          <Progress 
-            value={dailyProgressPercentage} 
-            className="h-1.5 bg-muted/50"
-          />
+          <div className="w-full bg-border h-1">
+            <div 
+              className="h-full bg-success transition-all duration-300"
+              style={{ width: `${Math.min(dailyProgressPercentage, 100)}%` }}
+            />
+          </div>
         </div>
 
-        {/* Stats badges */}
-        <div className="flex items-center gap-2 mt-3">
-          <Badge variant="outline" className="text-xs">
-            🔥 {todayRead} today
-          </Badge>
-          {dailyProgressPercentage >= 100 && (
-            <Badge variant="secondary" className="text-xs bg-gradient-like text-white border-0">
-              Goal achieved!
+        {/* Stats row */}
+        <div className="flex items-center justify-between pt-2 text-xs">
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="text-xs font-sans font-bold border-2 border-border">
+              📰 {todayRead} READ TODAY
+            </Badge>
+            {dailyProgressPercentage >= 100 && (
+              <Badge variant="secondary" className="text-xs bg-success text-white border-0 font-sans font-bold">
+                🎯 GOAL MET!
+              </Badge>
+            )}
+          </div>
+          {isAllCaughtUp && (
+            <Badge variant="secondary" className="text-xs bg-foreground text-background border-0 font-sans font-bold sm:hidden">
+              ✓ DONE
             </Badge>
           )}
         </div>
