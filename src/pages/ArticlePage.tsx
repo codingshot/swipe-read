@@ -1,0 +1,223 @@
+import { useEffect, useState } from 'react';
+import { useParams, Link, Navigate } from 'react-router-dom';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { ArrowLeft, ExternalLink, Share2, Volume2, Clock, Twitter } from 'lucide-react';
+import { NewsItem } from '@/hooks/useNewsData';
+import { useSpeech } from '@/hooks/useSpeech';
+import { useToast } from '@/hooks/use-toast';
+
+const RSS_API_URL = 'https://grants-rss.up.railway.app/api/items';
+
+export const ArticlePage = () => {
+  const { id } = useParams<{ id: string }>();
+  const [article, setArticle] = useState<NewsItem | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { speak } = useSpeech();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchArticle = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(RSS_API_URL);
+        if (!response.ok) {
+          throw new Error('Failed to fetch articles');
+        }
+        
+        const articles: NewsItem[] = await response.json();
+        const foundArticle = articles.find(a => a.id === id);
+        
+        if (foundArticle) {
+          setArticle(foundArticle);
+        } else {
+          setError('Article not found');
+        }
+      } catch (err) {
+        setError('Failed to load article');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchArticle();
+    }
+  }, [id]);
+
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMinutes / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMinutes < 1) return 'Just now';
+    if (diffMinutes < 60) return `${diffMinutes}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    return `${diffDays}d ago`;
+  };
+
+  const handleShare = async () => {
+    if (!article) return;
+
+    const shareUrl = window.location.href;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: article.title,
+          text: article.description,
+          url: shareUrl,
+        });
+      } catch (err) {
+        // User cancelled
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        toast({
+          title: "Link copied!",
+          description: "Article link copied to clipboard",
+        });
+      } catch (err) {
+        toast({
+          title: "Sharing failed",
+          description: "Could not share this article",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const isTwitterSource = article && (
+    article.source.title.toLowerCase() === 'twitter' || 
+    article.link.includes('x.com') || 
+    article.link.includes('twitter.com')
+  );
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-lg font-headline font-bold">Loading article...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !article) {
+    return <Navigate to="/" replace />;
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b-2 border-border bg-background sticky top-0 z-50">
+        <div className="container max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+          <Link to="/">
+            <Button variant="newspaper" size="sm">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              BACK TO READ mode
+            </Button>
+          </Link>
+          
+          <div className="flex items-center gap-2">
+            <Button
+              variant="newspaper"
+              size="sm"
+              onClick={() => speak(article.title + '. ' + article.description)}
+            >
+              <Volume2 className="w-4 h-4 mr-2" />
+              LISTEN
+            </Button>
+            
+            <Button
+              variant="newspaper"
+              size="sm"
+              onClick={handleShare}
+            >
+              <Share2 className="w-4 h-4 mr-2" />
+              SHARE
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      {/* Article Content */}
+      <div className="container max-w-4xl mx-auto px-4 py-8">
+        <Card className="swipe-card p-8">
+          {/* Article Meta */}
+          <div className="flex items-center justify-between mb-6 pb-4 border-b-2 border-border">
+            <div className="flex items-center gap-2 text-muted-foreground text-sm font-sans">
+              <Clock className="w-4 h-4" />
+              {formatTimeAgo(article.date)}
+            </div>
+            <Badge variant="outline" className="font-sans font-bold border-2 border-border">
+              {article.source.title}
+            </Badge>
+          </div>
+
+          {/* Title */}
+          <h1 className="font-headline text-3xl sm:text-4xl font-bold text-foreground leading-tight mb-6">
+            {article.title}
+          </h1>
+
+          {/* Author */}
+          {article.author.length > 0 && (
+            <div className="text-sm text-muted-foreground mb-6 font-sans uppercase tracking-wide border-b border-border pb-4">
+              BY {article.author.map(a => a.name).join(', ')}
+            </div>
+          )}
+
+          {/* Content */}
+          <div className="font-body text-lg leading-relaxed text-foreground mb-8 whitespace-pre-wrap">
+            {article.content || article.description}
+          </div>
+
+          {/* Tags */}
+          <div className="flex flex-wrap gap-2 mb-8 pb-4 border-b border-border">
+            {article.category.map((cat, index) => (
+              <Badge key={index} variant="outline" className="font-sans font-medium border-2 border-border uppercase">
+                {cat.name}
+              </Badge>
+            ))}
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center justify-between">
+            <Link to="/">
+              <Button variant="newspaper">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                CONTINUE READING
+              </Button>
+            </Link>
+            
+            <div className="flex gap-2">
+              {isTwitterSource && (
+                <Button
+                  variant="newspaper"
+                  onClick={() => window.open(article.link, '_blank')}
+                >
+                  <Twitter className="w-4 h-4 mr-2" />
+                  VIEW ON X
+                </Button>
+              )}
+              
+              <Button
+                variant="newspaper"
+                onClick={() => window.open(article.link, '_blank')}
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                VIEW ORIGINAL
+              </Button>
+            </div>
+          </div>
+        </Card>
+      </div>
+    </div>
+  );
+};

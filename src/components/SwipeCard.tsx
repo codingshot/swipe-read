@@ -39,6 +39,7 @@ interface SwipeCardProps {
   onShare: (item: NewsItem) => void;
   onSpeak: (text: string) => void;
   onSaveForLater?: (item: NewsItem) => void;
+  'data-card-index'?: number;
   className?: string;
   style?: React.CSSProperties;
 }
@@ -49,6 +50,7 @@ export const SwipeCard = ({
   onShare, 
   onSpeak, 
   onSaveForLater,
+  'data-card-index': dataCardIndex,
   className, 
   style 
 }: SwipeCardProps) => {
@@ -194,6 +196,7 @@ export const SwipeCard = ({
   return (
     <div
       ref={cardRef}
+      data-card-index={dataCardIndex}
       className={cn(
         "relative w-full max-w-sm mx-auto cursor-grab active:cursor-grabbing",
         "transform-gpu transition-all duration-200",

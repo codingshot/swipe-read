@@ -65,10 +65,6 @@ export const ReadMode = () => {
     }
   }, [isAutoPlay, currentIndex, unreadArticles.length, isAllCaughtUp, setCurrentIndex, currentArticle]);
 
-  const handleToggleAutoPlay = () => {
-    setIsAutoPlay(!isAutoPlay);
-  };
-
   const handleLike = () => {
     if (currentArticle) {
       handleSwipe('right', currentArticle);
@@ -79,6 +75,42 @@ export const ReadMode = () => {
     if (currentArticle) {
       handleSwipe('left', currentArticle);
     }
+  };
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Only handle shortcuts when not typing in inputs
+      if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
+      switch (event.code) {
+        case 'Space':
+          event.preventDefault();
+          // Toggle card flip (assumes current card is the first one)
+          const currentCard = document.querySelector('[data-card-index="0"]');
+          if (currentCard) {
+            (currentCard as HTMLElement).click();
+          }
+          break;
+        case 'ArrowLeft':
+          event.preventDefault();
+          handleDismiss();
+          break;
+        case 'ArrowRight':
+          event.preventDefault();
+          handleLike();
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleLike, handleDismiss]);
+
+  const handleToggleAutoPlay = () => {
+    setIsAutoPlay(!isAutoPlay);
   };
 
   const handleBookmarkAction = () => {
@@ -289,13 +321,12 @@ export const ReadMode = () => {
 
       {/* Navigation Features on Left Bottom */}
       <NavigationFeatures
-        readCount={readArticles.length}
+        readArticles={readArticles}
         savedCount={savedForLaterArticles.length}
-        onViewReadStories={handleViewReadStories}
         onViewSavedStories={handleViewSavedStories}
       />
 
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-280px)] sm:min-h-[calc(100vh-240px)] p-4 sm:p-6 relative px-16 sm:px-20">
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-300px)] sm:min-h-[calc(100vh-260px)] p-4 sm:p-8 relative px-16 sm:px-20 pb-32 sm:pb-24">
         {/* Demo mode indicator */}
         {timeFilter === 'demo' && (
           <div className="absolute top-2 sm:top-4 left-1/2 transform -translate-x-1/2 z-40">
@@ -317,6 +348,7 @@ export const ReadMode = () => {
                 onShare={handleShare}
                 onSpeak={speak}
                 onSaveForLater={handleSaveForLater}
+                data-card-index={index}
                 className={cn(
                   "absolute inset-0 transition-all duration-300 newspaper-enter",
                   index === 0 ? "z-30" : index === 1 ? "z-20" : "z-10"
