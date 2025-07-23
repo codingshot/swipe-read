@@ -50,6 +50,7 @@ export const useNewsData = (initialTimeFilter: TimeFilter = 'day', feedUrl?: str
   const [articles, setArticles] = useState<NewsItem[]>([]);
   const [allArticles, setAllArticles] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMessage, setLoadingMessage] = useState('Loading articles...');
   const [error, setError] = useState<string | null>(null);
   const [readItems, setReadItems] = useState<Set<string>>(new Set());
   const [swipeActions, setSwipeActions] = useState<SwipeAction[]>([]);
@@ -123,6 +124,63 @@ export const useNewsData = (initialTimeFilter: TimeFilter = 'day', feedUrl?: str
     });
   };
 
+  // Get loading message for current filter
+  const getLoadingMessage = (filter: TimeFilter) => {
+    switch (filter) {
+      case 'day':
+        return 'Loading articles from the past 24 hours...';
+      case 'week':
+        return 'Loading articles from the past week...';
+      case 'month':
+        return 'Loading articles from the past month...';
+      case 'before':
+        return 'Loading older articles...';
+      case 'all':
+        return 'Loading all articles...';
+      case 'demo':
+        return 'Loading demo articles...';
+      default:
+        return 'Loading articles...';
+    }
+  };
+
+  // Auto-fallback logic to find articles
+  const findArticlesWithFallback = async (articlesData: NewsItem[], requestedFilter: TimeFilter) => {
+    const fallbackOrder: TimeFilter[] = ['day', 'week', 'month', 'all'];
+    
+    // If requested filter is not in fallback order, try it first
+    const filtersToTry = requestedFilter === 'demo' || requestedFilter === 'before' || requestedFilter === 'all' 
+      ? [requestedFilter] 
+      : [requestedFilter, ...fallbackOrder.filter(f => f !== requestedFilter)];
+
+    for (const filter of filtersToTry) {
+      setLoadingMessage(getLoadingMessage(filter));
+      
+      const filteredArticles = filterArticlesByTime(articlesData, filter);
+      
+      if (filteredArticles.length > 0) {
+        if (filter !== requestedFilter) {
+          // Auto-switched to a different filter
+          setTimeFilter(filter);
+          localStorage.setItem(STORAGE_KEYS.TIME_FILTER, filter);
+          
+          toast({
+            title: `No articles found for ${requestedFilter}`,
+            description: `Auto-switched to ${filter} filter (${filteredArticles.length} articles found)`,
+          });
+        }
+        return { articles: filteredArticles, actualFilter: filter };
+      }
+      
+      // Add delay to show loading message for each attempt
+      if (filter !== filtersToTry[filtersToTry.length - 1]) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+    }
+    
+    return { articles: [], actualFilter: requestedFilter };
+  };
+
   // Fetch articles from RSS API
   useEffect(() => {
     const fetchArticles = async () => {
@@ -131,6 +189,7 @@ export const useNewsData = (initialTimeFilter: TimeFilter = 'day', feedUrl?: str
       try {
         setLoading(true);
         setError(null);
+        setLoadingMessage(getLoadingMessage(timeFilter));
 
         const response = await fetch(feedUrl);
         if (!response.ok) {
@@ -146,36 +205,19 @@ export const useNewsData = (initialTimeFilter: TimeFilter = 'day', feedUrl?: str
 
         setAllArticles(sortedArticles);
 
-        // Apply initial time filter
-        const filteredArticles = filterArticlesByTime(sortedArticles, timeFilter);
+        // Apply time filter with auto-fallback
+        const { articles: filteredArticles, actualFilter } = await findArticlesWithFallback(sortedArticles, timeFilter);
         setArticles(filteredArticles);
         
         // Reset current index when filter changes
         setCurrentIndex(0);
 
-        // Check if we need to suggest alternative filters
+        // Show final message if no articles found anywhere
         if (filteredArticles.length === 0) {
-          if (timeFilter === 'day') {
-            const weekArticles = filterArticlesByTime(sortedArticles, 'week');
-            if (weekArticles.length > 0) {
-              toast({
-                title: "No articles today",
-                description: `Found ${weekArticles.length} articles from this week. Try switching to week view in settings.`,
-              });
-            } else if (sortedArticles.length > 0) {
-              toast({
-                title: "No recent articles",
-                description: `Found ${sortedArticles.length} older articles. Try demo mode to explore them.`,
-              });
-            }
-          } else if (timeFilter === 'week') {
-            if (sortedArticles.length > 0) {
-              toast({
-                title: "No articles this week",
-                description: `Found ${sortedArticles.length} older articles. Try demo mode to explore them.`,
-              });
-            }
-          }
+          toast({
+            title: "No articles available",
+            description: "No articles found in any time period. Try checking back later.",
+          });
         }
 
       } catch (err) {
@@ -195,21 +237,29 @@ export const useNewsData = (initialTimeFilter: TimeFilter = 'day', feedUrl?: str
   }, [toast, timeFilter, feedUrl]);
 
   // Change time filter
-  const changeTimeFilter = (newFilter: TimeFilter) => {
+  const changeTimeFilter = async (newFilter: TimeFilter) => {
     setTimeFilter(newFilter);
     localStorage.setItem(STORAGE_KEYS.TIME_FILTER, newFilter);
     
-    const filteredArticles = filterArticlesByTime(allArticles, newFilter);
+    setLoading(true);
+    setLoadingMessage(getLoadingMessage(newFilter));
+    
+    // Apply filter with auto-fallback
+    const { articles: filteredArticles, actualFilter } = await findArticlesWithFallback(allArticles, newFilter);
     setArticles(filteredArticles);
     setCurrentIndex(0);
+    setLoading(false);
 
     let description = '';
-    switch (newFilter) {
+    switch (actualFilter) {
       case 'day':
         description = 'Showing articles from the last 24 hours';
         break;
       case 'week':
         description = 'Showing articles from the last 7 days';
+        break;
+      case 'month':
+        description = 'Showing articles from the last 30 days';
         break;
       case 'all':
         description = 'Showing all available articles';
@@ -219,10 +269,12 @@ export const useNewsData = (initialTimeFilter: TimeFilter = 'day', feedUrl?: str
         break;
     }
 
-    toast({
-      title: `Switched to ${newFilter} view`,
-      description: `${description} (${filteredArticles.length} articles)`,
-    });
+    if (actualFilter === newFilter) {
+      toast({
+        title: `Switched to ${newFilter} view`,
+        description: `${description} (${filteredArticles.length} articles)`,
+      });
+    }
   };
 
   // Save data to localStorage
@@ -402,6 +454,7 @@ export const useNewsData = (initialTimeFilter: TimeFilter = 'day', feedUrl?: str
     articles,
     allArticles,
     loading,
+    loadingMessage,
     error,
     currentIndex,
     readItems,

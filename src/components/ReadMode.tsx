@@ -31,6 +31,7 @@ export const ReadMode = () => {
   const {
     articles,
     loading,
+    loadingMessage,
     error,
     currentIndex,
     unreadArticles,
@@ -178,8 +179,8 @@ export const ReadMode = () => {
           </div>
           <div className="space-y-2">
             <h2 className="text-lg font-semibold">Loading fresh articles...</h2>
-            <p className="text-muted-foreground text-sm">
-              Finding the latest news from the past 24 hours
+            <p className="text-muted-foreground text-sm animate-pulse">
+              {loadingMessage}
             </p>
           </div>
         </div>
