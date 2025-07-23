@@ -195,14 +195,6 @@ export const SwipeCard = ({
         <div className={cn("absolute inset-0 transition-transform duration-500 ease-out", isFlipped ? "transform rotateY-180" : "")}>
           {/* Front of card */}
           <div className={cn("absolute inset-0 p-4 sm:p-6 flex flex-col", isFlipped ? "opacity-0" : "opacity-100")}>
-            {/* Header with source only */}
-            <div className="flex items-center justify-between mb-3 sm:mb-4 pb-2 border-b border-border">
-              <div className="w-full" />
-              <Badge variant="outline" className="text-xs font-sans font-bold uppercase border-2 border-border">
-                {item.source.title}
-              </Badge>
-            </div>
-
             {/* Headline with typing animation */}
             <h2 className="font-headline text-lg sm:text-2xl font-bold text-foreground leading-tight mb-2 sm:mb-3 line-clamp-4 sm:line-clamp-3 headline-hover p-2 -m-2 transition-colors duration-150 min-h-[3rem] sm:min-h-[4rem]">
               {titleAnimation.displayedText}
