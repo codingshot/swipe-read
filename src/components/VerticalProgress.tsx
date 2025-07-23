@@ -32,8 +32,9 @@ export const VerticalProgress = ({
           />
         </div>
         <div className="text-xs font-sans font-bold text-center leading-tight transform -rotate-90 origin-center whitespace-nowrap">
-          <div className="mb-1">{Math.min(currentIndex + 1, totalArticles)}/{totalArticles}</div>
-          <div className="text-muted-foreground">STORIES</div>
+          <div className="text-muted-foreground">
+            {Math.min(currentIndex + 1, totalArticles)}/{totalArticles} STORIES
+          </div>
         </div>
       </div>
 
@@ -46,8 +47,9 @@ export const VerticalProgress = ({
           />
         </div>
         <div className="text-xs font-sans font-bold text-center leading-tight transform -rotate-90 origin-center whitespace-nowrap">
-          <div className="mb-1">{todayRead}/{dailyGoal}</div>
-          <div className="text-muted-foreground">DAILY</div>
+          <div className="text-muted-foreground">
+            {todayRead}/{dailyGoal} DAILY
+          </div>
         </div>
       </div>
 

@@ -22,8 +22,9 @@ export const ReadMode = () => {
   // Feed management
   const {
     feeds,
-    currentFeed,
-    changeFeed,
+    selectedFeeds,
+    changeFeeds,
+    getSelectedFeedUrls,
     getCurrentFeedUrl,
     loading: feedsLoading
   } = useFeedData();
@@ -51,7 +52,7 @@ export const ReadMode = () => {
     changeDailyGoal,
     canUndo,
     updateSwipeAction
-  } = useNewsData('day', getCurrentFeedUrl(), currentFeed, feeds.find(f => f.id === currentFeed)?.name);
+  } = useNewsData('day', getCurrentFeedUrl(), selectedFeeds[0] || 'multi', getSelectedFeedUrls().length > 1 ? 'Multi-Feed' : feeds.find(f => f.id === selectedFeeds[0])?.name);
 
   const { speak, stop, isSpeaking } = useSpeech();
   const [isAutoPlay, setIsAutoPlay] = useState(false);
@@ -121,7 +122,7 @@ export const ReadMode = () => {
     }
   };
 
-  // Keyboard shortcuts
+  // Keyboard shortcuts with animations
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       // Only handle shortcuts when not typing in inputs
@@ -140,18 +141,40 @@ export const ReadMode = () => {
           break;
         case 'ArrowLeft':
           event.preventDefault();
-          handleDismiss();
+          // Add animation trigger before handling dismiss
+          const leftCard = document.querySelector('[data-card-index="0"]');
+          if (leftCard && currentArticle) {
+            // Trigger swipe animation
+            const cardElement = leftCard as HTMLElement;
+            cardElement.style.transform = 'translateX(-100px) rotate(-15deg)';
+            cardElement.style.transition = 'transform 0.3s ease-out';
+            
+            setTimeout(() => {
+              handleDismiss();
+            }, 150);
+          }
           break;
         case 'ArrowRight':
           event.preventDefault();
-          handleLike();
+          // Add animation trigger before handling like
+          const rightCard = document.querySelector('[data-card-index="0"]');
+          if (rightCard && currentArticle) {
+            // Trigger swipe animation
+            const cardElement = rightCard as HTMLElement;
+            cardElement.style.transform = 'translateX(100px) rotate(15deg)';
+            cardElement.style.transition = 'transform 0.3s ease-out';
+            
+            setTimeout(() => {
+              handleLike();
+            }, 150);
+          }
           break;
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleLike, handleDismiss]);
+  }, [handleLike, handleDismiss, currentArticle]);
 
   const handleToggleAutoPlay = () => {
     const newAutoPlay = !isAutoPlay;
@@ -189,7 +212,11 @@ export const ReadMode = () => {
   };
 
   const handleSwitchToFeed = (feedId: string) => {
-    changeFeed(feedId);
+    changeFeeds([feedId]);
+  };
+
+  const handleFeedChange = (feedIds: string[]) => {
+    changeFeeds(feedIds);
   };
 
   const handleViewReadStories = () => {
@@ -254,10 +281,10 @@ export const ReadMode = () => {
           isAutoPlay={false}
           timeFilter={timeFilter}
           feeds={feeds}
-          currentFeed={currentFeed}
+          selectedFeeds={selectedFeeds}
           onToggleAutoPlay={() => {}}
           onTimeFilterChange={changeTimeFilter}
-          onFeedChange={changeFeed}
+          onFeedChange={handleFeedChange}
           onOpenSettings={() => setShowSettings(true)}
         />
         
@@ -383,11 +410,11 @@ export const ReadMode = () => {
         autoRead={autoRead}
         timeFilter={timeFilter}
         feeds={feeds}
-        currentFeed={currentFeed}
+        selectedFeeds={selectedFeeds}
         onToggleAutoPlay={handleToggleAutoPlay}
         onToggleAutoRead={handleToggleAutoRead}
         onTimeFilterChange={changeTimeFilter}
-        onFeedChange={changeFeed}
+        onFeedChange={handleFeedChange}
         onOpenSettings={() => setShowSettings(true)}
       />
       
@@ -407,7 +434,7 @@ export const ReadMode = () => {
         readArticles={readArticles}
         swipeActions={swipeActions}
         feeds={feeds}
-        currentFeed={currentFeed}
+        currentFeed={selectedFeeds[0] || ''}
         onUpdateSwipeAction={updateSwipeAction}
         onViewSavedStories={handleViewSavedStories}
         onSwitchToFeed={handleSwitchToFeed}
@@ -468,8 +495,8 @@ export const ReadMode = () => {
         isOpen={showSettings}
         onClose={() => setShowSettings(false)}
         feeds={feeds}
-        currentFeed={currentFeed}
-        onFeedChange={changeFeed}
+        currentFeed={selectedFeeds[0] || ''}
+        onFeedChange={(feedId) => changeFeeds([feedId])}
         timeFilter={timeFilter}
         onTimeFilterChange={changeTimeFilter}
         dailyGoal={dailyGoal}

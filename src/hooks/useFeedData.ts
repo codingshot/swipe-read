@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Feed } from '@/components/FeedSelector';
 
-const STORAGE_KEY = 'selected_feed';
-const DEFAULT_FEED = 'crypto-grants';
+const STORAGE_KEY = 'selected_feeds'; // Changed to plural
+const DEFAULT_FEEDS = ['crypto-grants']; // Changed to array
 
 export const useFeedData = () => {
   const [feeds, setFeeds] = useState<Feed[]>([]);
-  const [currentFeed, setCurrentFeed] = useState<string>(DEFAULT_FEED);
+  const [selectedFeeds, setSelectedFeeds] = useState<string[]>(DEFAULT_FEEDS);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,35 +31,78 @@ export const useFeedData = () => {
     loadFeeds();
   }, []);
 
-  // Load selected feed from localStorage
+  // Load selected feeds from localStorage and URL params
   useEffect(() => {
-    const savedFeed = localStorage.getItem(STORAGE_KEY);
-    if (savedFeed) {
-      setCurrentFeed(savedFeed);
+    const urlParams = new URLSearchParams(window.location.search);
+    const feedsFromUrl = urlParams.get('feeds');
+    
+    if (feedsFromUrl) {
+      const feedIds = feedsFromUrl.split(',').filter(id => feeds.some(f => f.id === id));
+      if (feedIds.length > 0) {
+        setSelectedFeeds(feedIds);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(feedIds));
+        return;
+      }
     }
-  }, []);
 
-  // Change feed
-  const changeFeed = (feedId: string) => {
-    setCurrentFeed(feedId);
-    localStorage.setItem(STORAGE_KEY, feedId);
+    const savedFeeds = localStorage.getItem(STORAGE_KEY);
+    if (savedFeeds) {
+      try {
+        const parsedFeeds = JSON.parse(savedFeeds);
+        if (Array.isArray(parsedFeeds) && parsedFeeds.length > 0) {
+          setSelectedFeeds(parsedFeeds);
+        }
+      } catch (e) {
+        // Fallback for old single feed format
+        setSelectedFeeds([savedFeeds]);
+      }
+    }
+  }, [feeds]);
+
+  // Update URL params when feeds change
+  useEffect(() => {
+    if (selectedFeeds.length > 0) {
+      const urlParams = new URLSearchParams(window.location.search);
+      urlParams.set('feeds', selectedFeeds.join(','));
+      const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+      window.history.replaceState({}, '', newUrl);
+    }
+  }, [selectedFeeds]);
+
+  // Change feeds
+  const changeFeeds = (feedIds: string[]) => {
+    setSelectedFeeds(feedIds);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(feedIds));
   };
 
-  // Get current feed URL
-  const getCurrentFeedUrl = () => {
-    const feed = feeds.find(f => f.id === currentFeed);
-    return feed?.rssUrl || feeds[0]?.rssUrl || '';
+  // Get selected feed URLs
+  const getSelectedFeedUrls = () => {
+    return feeds.filter(f => selectedFeeds.includes(f.id)).map(f => f.rssUrl);
   };
 
-  // Get current feed info
+  // Get selected feed info
+  const getSelectedFeeds = () => {
+    return feeds.filter(f => selectedFeeds.includes(f.id));
+  };
+
+  // Backward compatibility - get current feed (first selected)
   const getCurrentFeed = () => {
-    return feeds.find(f => f.id === currentFeed) || feeds[0];
+    return feeds.find(f => f.id === selectedFeeds[0]) || feeds[0];
+  };
+
+  const getCurrentFeedUrl = () => {
+    const feed = getCurrentFeed();
+    return feed?.rssUrl || '';
   };
 
   return {
     feeds,
-    currentFeed,
-    changeFeed,
+    selectedFeeds,
+    currentFeed: selectedFeeds[0] || DEFAULT_FEEDS[0], // Backward compatibility
+    changeFeeds,
+    changeFeed: (feedId: string) => changeFeeds([feedId]), // Backward compatibility
+    getSelectedFeedUrls,
+    getSelectedFeeds,
     getCurrentFeedUrl,
     getCurrentFeed,
     loading,

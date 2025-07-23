@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Settings, Filter, TrendingUp, PlayCircle, PauseCircle, Calendar, Clock, Zap, Newspaper, Volume2, VolumeX } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TimeFilter } from '@/hooks/useNewsData';
-import { FeedSelector, Feed } from './FeedSelector';
+import { MultiFeedSelector, Feed } from './MultiFeedSelector';
 
 interface ReadModeHeaderProps {
   currentIndex: number;
@@ -16,11 +16,11 @@ interface ReadModeHeaderProps {
   autoRead?: boolean;
   timeFilter: TimeFilter;
   feeds: Feed[];
-  currentFeed: string;
+  selectedFeeds: string[];
   onToggleAutoPlay: () => void;
   onToggleAutoRead?: () => void;
   onTimeFilterChange: (filter: TimeFilter) => void;
-  onFeedChange: (feedId: string) => void;
+  onFeedChange: (feedIds: string[]) => void;
   onOpenSettings: () => void;
   className?: string;
 }
@@ -34,7 +34,7 @@ export const ReadModeHeader = ({
   autoRead = false,
   timeFilter,
   feeds,
-  currentFeed,
+  selectedFeeds,
   onToggleAutoPlay,
   onToggleAutoRead,
   onTimeFilterChange,
@@ -81,11 +81,11 @@ export const ReadModeHeader = ({
             </h1>
           </div>
           
-          {/* Feed Selector replaces complete badge */}
+          {/* Multi Feed Selector */}
           <div className="flex-1 max-w-32 sm:max-w-40 mx-2">
-            <FeedSelector
+            <MultiFeedSelector
               feeds={feeds}
-              currentFeed={currentFeed}
+              selectedFeeds={selectedFeeds}
               onFeedChange={onFeedChange}
               className="text-xs"
             />
