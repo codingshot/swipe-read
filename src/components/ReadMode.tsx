@@ -482,8 +482,8 @@ export const ReadMode = () => {
         dailyGoal={dailyStats.dailyGoal}
       />
 
-      {/* Coming Soon Features on Right */}
-      <ComingSoonFeatures />
+      {/* Coming Soon Features on Right with Share Button */}
+      <ComingSoonFeatures currentArticle={currentArticle} />
 
       {/* Navigation Features on Left Bottom */}
       <NavigationFeatures

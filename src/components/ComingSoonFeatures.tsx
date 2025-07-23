@@ -1,13 +1,20 @@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Bookmark, MessageSquare, Upload, Bell } from 'lucide-react';
+import { ShareButton } from './ShareButton';
 import { cn } from '@/lib/utils';
 
 interface ComingSoonFeaturesProps {
+  currentArticle?: {
+    id: string;
+    title: string;
+    description: string;
+    link: string;
+  };
   className?: string;
 }
 
-export const ComingSoonFeatures = ({ className }: ComingSoonFeaturesProps) => {
+export const ComingSoonFeatures = ({ currentArticle, className }: ComingSoonFeaturesProps) => {
   const features = [
     {
       icon: Bookmark,
@@ -67,6 +74,14 @@ export const ComingSoonFeatures = ({ className }: ComingSoonFeaturesProps) => {
           </div>
         );
       })}
+      
+      {/* Share Button - positioned under notification icon */}
+      <div className="mt-2 sm:mt-3">
+        <ShareButton 
+          currentArticle={currentArticle}
+          className="w-10 h-10 p-0"
+        />
+      </div>
     </div>
   );
 };
