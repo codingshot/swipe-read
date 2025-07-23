@@ -207,10 +207,19 @@ export const SwipeCard = ({
               {!titleAnimation.isComplete && <span className="animate-pulse">|</span>}
             </h2>
 
-            {/* Time ago under headline */}
-            <div className="flex items-center gap-1 sm:gap-2 text-muted-foreground text-xs sm:text-sm font-sans uppercase tracking-wide mb-3 sm:mb-4">
-              <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
-              {formatTimeAgo(item.date)}
+            {/* Time ago under headline with listen button */}
+            <div className="flex items-center justify-between gap-2 text-muted-foreground text-xs sm:text-sm font-sans uppercase tracking-wide mb-3 sm:mb-4">
+              <div className="flex items-center gap-1 sm:gap-2">
+                <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
+                {formatTimeAgo(item.date)}
+              </div>
+              <Button variant="newspaper" size="sm" onClick={e => {
+                e.preventDefault();
+                e.stopPropagation();
+                onSpeak(item.title + '. ' + getClippedDescription());
+              }} className="h-6 w-6 p-0 pointer-events-auto" title="Listen to article">
+                <Volume2 className="w-3 h-3" />
+              </Button>
             </div>
 
             {/* Lead paragraph with typing animation */}
@@ -267,16 +276,6 @@ export const SwipeCard = ({
                 </div>
               </div>}
 
-            {/* Action buttons - newspaper style */}
-            <div className="flex items-center justify-center gap-2 border-t border-border pt-3 relative z-40 pointer-events-auto">
-              <Button variant="newspaper" size="sm" onClick={e => {
-              e.preventDefault();
-              e.stopPropagation();
-              onSpeak(item.title + '. ' + getClippedDescription());
-            }} className="flex items-center gap-1 text-xs pointer-events-auto" title="Listen to article">
-                <Volume2 className="w-3 h-3" />
-              </Button>
-            </div>
           </div>
 
           {/* Back of card - Full article view */}

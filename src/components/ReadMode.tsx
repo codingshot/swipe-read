@@ -66,14 +66,14 @@ export const ReadMode = () => {
   // Auto-play functionality with reading time calculation
   useEffect(() => {
     if (isAutoPlay && !isAllCaughtUp && currentArticle) {
+      const readingTime = calculateReadingTime(currentArticle.description, currentArticle.title);
+      const autoPlayDelay = Math.max(5000, readingTime * 1000); // Minimum 5 seconds or calculated reading time
+      
       // Start auto-read if enabled
       if (autoRead) {
         const textToSpeak = currentArticle.title + '. ' + currentArticle.description;
         speak(textToSpeak);
       }
-
-      const readingTime = calculateReadingTime(currentArticle.description, currentArticle.title);
-      const autoPlayDelay = Math.max(5000, readingTime * 1000); // Minimum 5 seconds or calculated reading time
       
       const interval = setInterval(() => {
         // Stop speaking when moving to next card
@@ -491,16 +491,14 @@ export const ReadMode = () => {
         </div>
       </div>
 
-      {/* Swipe Actions - Hidden in auto-play mode to save space */}
-      {!isAutoPlay && (
-        <SwipeActions
-          onLike={handleLike}
-          onDismiss={handleDismiss}
-          onUndo={undoLastAction}
-          canUndo={canUndo}
-          className="fixed bottom-6 sm:bottom-8 left-0 right-0 z-50 pointer-events-auto"
-        />
-      )}
+      {/* Swipe Actions - Now always visible */}
+      <SwipeActions
+        onLike={handleLike}
+        onDismiss={handleDismiss}
+        onUndo={undoLastAction}
+        canUndo={canUndo}
+        className="fixed bottom-6 sm:bottom-8 left-0 right-0 z-50 pointer-events-auto"
+      />
 
       {/* Settings Popup */}
       <SettingsPopup

@@ -76,9 +76,6 @@ export const ReadModeHeader = ({
         <div className="flex items-center justify-between mb-2 sm:mb-3">
           <div className="flex items-center gap-1 sm:gap-2">
             <Newspaper className="w-4 h-4 sm:w-5 sm:h-5" />
-            <h1 className="font-headline text-sm sm:text-lg font-bold text-foreground uppercase tracking-wider">
-              DAILY READ
-            </h1>
           </div>
           
           {/* Multi Feed Selector */}
