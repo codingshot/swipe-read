@@ -48,6 +48,8 @@ export const ReadMode = () => {
     saveForLater,
     undoLastAction,
     shareArticle,
+    markAsUnread,
+    markMultipleAsUnread,
     setCurrentIndex,
     changeTimeFilter,
     changeDailyGoal,
@@ -509,6 +511,8 @@ export const ReadMode = () => {
         onUpdateSwipeAction={updateSwipeAction}
         onViewSavedStories={handleViewSavedStories}
         onSwitchToFeed={handleSwitchToFeed}
+        onMarkAsUnread={markAsUnread}
+        onMarkMultipleAsUnread={markMultipleAsUnread}
         savedCount={savedForLaterArticles.length}
       />
 

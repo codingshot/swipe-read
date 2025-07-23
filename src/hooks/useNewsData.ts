@@ -315,6 +315,22 @@ export const useNewsData = (initialTimeFilter: TimeFilter = 'day', feedUrls?: st
     saveToStorage(STORAGE_KEYS.READ_ITEMS, Array.from(newReadItems));
   };
 
+  // Mark article as unread
+  const markAsUnread = (itemId: string) => {
+    const newReadItems = new Set(readItems);
+    newReadItems.delete(itemId);
+    setReadItems(newReadItems);
+    saveToStorage(STORAGE_KEYS.READ_ITEMS, Array.from(newReadItems));
+  };
+
+  // Mark multiple articles as unread
+  const markMultipleAsUnread = (itemIds: string[]) => {
+    const newReadItems = new Set(readItems);
+    itemIds.forEach(id => newReadItems.delete(id));
+    setReadItems(newReadItems);
+    saveToStorage(STORAGE_KEYS.READ_ITEMS, Array.from(newReadItems));
+  };
+
   // Handle swipe action
   const handleSwipe = (direction: 'left' | 'right', item: NewsItem) => {
     const action: SwipeAction = {
@@ -495,6 +511,8 @@ export const useNewsData = (initialTimeFilter: TimeFilter = 'day', feedUrls?: st
     undoLastAction,
     shareArticle,
     markAsRead,
+    markAsUnread,
+    markMultipleAsUnread,
     saveForLater,
     setCurrentIndex,
     changeTimeFilter,

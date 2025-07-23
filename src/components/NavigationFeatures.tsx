@@ -14,6 +14,8 @@ interface NavigationFeaturesProps {
   onUpdateSwipeAction: (itemId: string, newAction: 'like' | 'dismiss' | 'bookmark') => void;
   onViewSavedStories: () => void;
   onSwitchToFeed: (feedId: string) => void;
+  onMarkAsUnread: (itemId: string) => void;
+  onMarkMultipleAsUnread: (itemIds: string[]) => void;
   savedCount: number;
   className?: string;
 }
@@ -26,6 +28,8 @@ export const NavigationFeatures = ({
   onUpdateSwipeAction,
   onViewSavedStories,
   onSwitchToFeed,
+  onMarkAsUnread,
+  onMarkMultipleAsUnread,
   savedCount,
   className 
 }: NavigationFeaturesProps) => {
@@ -43,6 +47,8 @@ export const NavigationFeatures = ({
           currentFeed={currentFeed}
           onUpdateSwipeAction={onUpdateSwipeAction}
           onSwitchToFeed={onSwitchToFeed}
+          onMarkAsUnread={onMarkAsUnread}
+          onMarkMultipleAsUnread={onMarkMultipleAsUnread}
           trigger={
           <div className="relative group">
             <Button

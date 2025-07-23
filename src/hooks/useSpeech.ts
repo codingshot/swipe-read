@@ -61,7 +61,14 @@ export const useSpeech = () => {
       window.speechSynthesis.cancel();
     }
 
-    const utterance = new SpeechSynthesisUtterance(text);
+    // Clean text for speech: remove URLs and HTML entities
+    const cleanText = text
+      .replace(/https?:\/\/[^\s]+/g, '') // Remove URLs starting with http:// or https://
+      .replace(/&[#\w]+;/g, ' ') // Remove HTML entities
+      .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+      .trim();
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
     currentUtterance.current = utterance;
 
     // Configure voice settings

@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ExternalLink, Clock, Twitter, Heart, X, Globe, Play } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ExternalLink, Clock, Twitter, Heart, X, Globe, Play, RotateCcw, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { NewsItem, SwipeAction } from '@/hooks/useNewsData';
 import { Feed } from './FeedSelector';
@@ -17,11 +18,15 @@ interface ReadStoriesPopupProps {
   currentFeed: string;
   onUpdateSwipeAction: (itemId: string, newAction: 'like' | 'dismiss' | 'bookmark') => void;
   onSwitchToFeed: (feedId: string) => void;
+  onMarkAsUnread: (itemId: string) => void;
+  onMarkMultipleAsUnread: (itemIds: string[]) => void;
   trigger: React.ReactNode;
 }
 
-export const ReadStoriesPopup = ({ readArticles, swipeActions, feeds, currentFeed, onUpdateSwipeAction, onSwitchToFeed, trigger }: ReadStoriesPopupProps) => {
+export const ReadStoriesPopup = ({ readArticles, swipeActions, feeds, currentFeed, onUpdateSwipeAction, onSwitchToFeed, onMarkAsUnread, onMarkMultipleAsUnread, trigger }: ReadStoriesPopupProps) => {
   const [open, setOpen] = useState(false);
+  const [selectedArticles, setSelectedArticles] = useState<Set<string>>(new Set());
+  const [selectMode, setSelectMode] = useState(false);
 
   const getSwipeAction = (articleId: string) => {
     return swipeActions.find(action => action.itemId === articleId);
@@ -67,6 +72,32 @@ export const ReadStoriesPopup = ({ readArticles, swipeActions, feeds, currentFee
     return { id: currentFeed, name: feeds.find(f => f.id === currentFeed)?.name || 'Unknown Feed' };
   };
 
+  const handleSelectAll = () => {
+    if (selectedArticles.size === readArticles.length) {
+      setSelectedArticles(new Set());
+    } else {
+      setSelectedArticles(new Set(readArticles.map(article => article.id)));
+    }
+  };
+
+  const handleArticleSelect = (articleId: string) => {
+    const newSelected = new Set(selectedArticles);
+    if (newSelected.has(articleId)) {
+      newSelected.delete(articleId);
+    } else {
+      newSelected.add(articleId);
+    }
+    setSelectedArticles(newSelected);
+  };
+
+  const handleMarkSelectedAsUnread = () => {
+    if (selectedArticles.size > 0) {
+      onMarkMultipleAsUnread(Array.from(selectedArticles));
+      setSelectedArticles(new Set());
+      setSelectMode(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -74,9 +105,59 @@ export const ReadStoriesPopup = ({ readArticles, swipeActions, feeds, currentFee
       </DialogTrigger>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden border-2 border-border bg-background">
         <DialogHeader className="border-b-2 border-border pb-4">
-          <DialogTitle className="font-headline text-xl font-bold uppercase tracking-wide">
-            READ STORIES ({readArticles.length})
-          </DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="font-headline text-xl font-bold uppercase tracking-wide">
+              READ STORIES ({readArticles.length})
+            </DialogTitle>
+            
+            {/* Select Mode Controls */}
+            <div className="flex items-center gap-2">
+              {selectMode ? (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleSelectAll}
+                    className="text-xs"
+                  >
+                    <Check className="w-3 h-3 mr-1" />
+                    {selectedArticles.size === readArticles.length ? 'Deselect All' : 'Select All'}
+                  </Button>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={handleMarkSelectedAsUnread}
+                    disabled={selectedArticles.size === 0}
+                    className="text-xs"
+                  >
+                    <RotateCcw className="w-3 h-3 mr-1" />
+                    Mark as Unread ({selectedArticles.size})
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setSelectMode(false);
+                      setSelectedArticles(new Set());
+                    }}
+                    className="text-xs"
+                  >
+                    Cancel
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectMode(true)}
+                  className="text-xs"
+                >
+                  <Check className="w-3 h-3 mr-1" />
+                  Select
+                </Button>
+              )}
+            </div>
+          </div>
         </DialogHeader>
         
         <Tabs defaultValue="all" className="h-full">
@@ -104,11 +185,21 @@ export const ReadStoriesPopup = ({ readArticles, swipeActions, feeds, currentFee
               ) : (
                 <div className="grid gap-4 sm:grid-cols-2">
                   {readArticles.map((article) => (
-                <Card key={article.id} className="p-4 border-2 border-border hover:shadow-elevated transition-all duration-200">
+                <Card key={article.id} className={cn(
+                  "p-4 border-2 hover:shadow-elevated transition-all duration-200",
+                  selectedArticles.has(article.id) ? "border-primary bg-primary/5" : "border-border"
+                )}>
                   <div className="space-y-3">
-                    {/* Header with feed info and quick switch */}
+                    {/* Selection checkbox and header */}
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
+                      {selectMode && (
+                        <Checkbox
+                          checked={selectedArticles.has(article.id)}
+                          onCheckedChange={() => handleArticleSelect(article.id)}
+                          className="mr-2"
+                        />
+                      )}
+                      <div className="flex items-center gap-2 flex-1">
                         <Globe className="w-4 h-4 text-muted-foreground" />
                         {(() => {
                           const action = getSwipeAction(article.id);
@@ -181,6 +272,16 @@ export const ReadStoriesPopup = ({ readArticles, swipeActions, feeds, currentFee
                               </Button>
                             </Link>
                             
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => onMarkAsUnread(article.id)}
+                              className="text-xs px-2 border-warning/50 text-warning hover:bg-warning/10"
+                              title="Mark as unread"
+                            >
+                              <RotateCcw className="w-3 h-3" />
+                            </Button>
+                            
                             {/* Change action buttons */}
                             {getSwipeAction(article.id)?.action === 'like' ? (
                               <Button
@@ -245,8 +346,21 @@ export const ReadStoriesPopup = ({ readArticles, swipeActions, feeds, currentFee
               ) : (
                 <div className="grid gap-4 sm:grid-cols-2">
                   {likedArticles.map((article) => (
-                     <Card key={article.id} className="p-4 border-2 border-border hover:shadow-elevated transition-all duration-200">
+                     <Card key={article.id} className={cn(
+                       "p-4 border-2 hover:shadow-elevated transition-all duration-200",
+                       selectedArticles.has(article.id) ? "border-primary bg-primary/5" : "border-border"
+                     )}>
                        <div className="space-y-3">
+                         {/* Selection checkbox for liked articles */}
+                         {selectMode && (
+                           <div className="flex items-center mb-2">
+                             <Checkbox
+                               checked={selectedArticles.has(article.id)}
+                               onCheckedChange={() => handleArticleSelect(article.id)}
+                               className="mr-2"
+                             />
+                           </div>
+                         )}
                           {/* Header with feed info and quick switch */}
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
@@ -322,6 +436,16 @@ export const ReadStoriesPopup = ({ readArticles, swipeActions, feeds, currentFee
                               </Button>
                             </Link>
                             
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => onMarkAsUnread(article.id)}
+                              className="text-xs px-2 border-warning/50 text-warning hover:bg-warning/10"
+                              title="Mark as unread"
+                            >
+                              <RotateCcw className="w-3 h-3" />
+                            </Button>
+                            
                             {/* Change to skipped button */}
                             <Button
                               variant="outline" 
@@ -374,8 +498,21 @@ export const ReadStoriesPopup = ({ readArticles, swipeActions, feeds, currentFee
               ) : (
                 <div className="grid gap-4 sm:grid-cols-2">
                   {skippedArticles.map((article) => (
-                     <Card key={article.id} className="p-4 border-2 border-border hover:shadow-elevated transition-all duration-200">
+                     <Card key={article.id} className={cn(
+                       "p-4 border-2 hover:shadow-elevated transition-all duration-200",
+                       selectedArticles.has(article.id) ? "border-primary bg-primary/5" : "border-border"
+                     )}>
                        <div className="space-y-3">
+                         {/* Selection checkbox for skipped articles */}
+                         {selectMode && (
+                           <div className="flex items-center mb-2">
+                             <Checkbox
+                               checked={selectedArticles.has(article.id)}
+                               onCheckedChange={() => handleArticleSelect(article.id)}
+                               className="mr-2"
+                             />
+                           </div>
+                         )}
                           {/* Header with feed info and quick switch */}
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
@@ -445,22 +582,32 @@ export const ReadStoriesPopup = ({ readArticles, swipeActions, feeds, currentFee
                         {/* Actions */}
                         <div className="flex items-center justify-between pt-2 border-t border-border">
                           <div className="flex gap-1">
-                            <Link to={`/article/${article.id}`}>
-                              <Button variant="newspaper" size="sm" className="text-xs">
-                                READ NOW
-                              </Button>
-                            </Link>
-                            
-                            {/* Change to liked button */}
-                            <Button
-                              variant="outline"
-                              size="sm" 
-                              onClick={() => onUpdateSwipeAction(article.id, 'like')}
-                              className="text-xs px-2 border-success/50 text-success hover:bg-success/10"
-                              title="Change to liked"
-                            >
-                              <Heart className="w-3 h-3" />
-                            </Button>
+                             <Link to={`/article/${article.id}`}>
+                               <Button variant="newspaper" size="sm" className="text-xs">
+                                 READ NOW
+                               </Button>
+                             </Link>
+                             
+                             <Button
+                               variant="outline"
+                               size="sm"
+                               onClick={() => onMarkAsUnread(article.id)}
+                               className="text-xs px-2 border-warning/50 text-warning hover:bg-warning/10"
+                               title="Mark as unread"
+                             >
+                               <RotateCcw className="w-3 h-3" />
+                             </Button>
+                             
+                             {/* Change to liked button */}
+                             <Button
+                               variant="outline"
+                               size="sm" 
+                               onClick={() => onUpdateSwipeAction(article.id, 'like')}
+                               className="text-xs px-2 border-success/50 text-success hover:bg-success/10"
+                               title="Change to liked"
+                             >
+                               <Heart className="w-3 h-3" />
+                             </Button>
                           </div>
                           
                           <div className="flex gap-1">
