@@ -307,89 +307,201 @@ export const SwipeCard = ({
 
           {/* Back of card - Full article view */}
           <div className={cn("absolute inset-0 p-4 sm:p-6 transform rotateY-180 bg-background", isFlipped ? "opacity-100" : "opacity-0")}>
-            <div className="h-full overflow-y-auto">
-              <div className="flex items-center justify-between mb-4 pb-2 border-b-2 border-border">
-                <h3 className="font-headline text-base sm:text-lg font-bold text-foreground uppercase tracking-wide">
-                  FULL STORY
-                </h3>
-                <div className="flex gap-1">
-                  {isTwitterSource && <Button variant="newspaper" size="sm" onClick={e => {
-                  e.stopPropagation();
-                  window.open(item.link, '_blank');
-                }} className="px-2" title="Open on Twitter/X">
-                      <Twitter className="w-3 h-3" />
-                    </Button>}
-                  
-                  
+            <div className="h-full overflow-y-auto space-y-4">
+              {/* Header with title and meta info */}
+              <div className="border-b-2 border-border pb-3">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="font-headline text-base sm:text-lg font-bold text-foreground uppercase tracking-wide">
+                    FULL STORY
+                  </h3>
+                  <div className="flex gap-1">
+                    {isTwitterSource && <Button variant="newspaper" size="sm" onClick={e => {
+                    e.stopPropagation();
+                    window.open(item.link, '_blank');
+                  }} className="px-2" title="Open on Twitter/X">
+                        <Twitter className="w-3 h-3" />
+                      </Button>}
+                  </div>
+                </div>
+                
+                {/* Article metadata row */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <Clock className="w-3 h-3" />
+                    <span>Published: {new Date(item.date).toLocaleDateString()} at {new Date(item.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span>ID: {item.id.slice(-8)}</span>
+                  </div>
                 </div>
               </div>
-              
-              {/* Tags section on back */}
-              <div className="flex flex-wrap gap-1 sm:gap-2 mb-4 pb-2 border-b border-border">
-                {item.category.map((cat, index) => <Badge key={index} variant="outline" className="text-xs font-sans font-medium border-2 border-border uppercase">
-                    {cat.name}
-                  </Badge>)}
-              </div>
-              
-              <div className="space-y-4">
-                {/* Author/Tweet info */}
-                {item.author.length > 0 && <div className="bg-accent/10 p-3 rounded border border-border">
-                    <div className="space-y-2">
-                      {/* Author Information */}
-                      <div>
-                        <h4 className="font-headline text-xs font-bold uppercase tracking-wide mb-1">
-                          AUTHOR
-                        </h4>
-                        <div className="flex flex-wrap gap-1">
-                          {item.author.map((author, index) => (
-                            <div key={index} className="flex items-center gap-1">
-                              {author.link ? (
-                                <a
-                                  href={author.link}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-xs font-medium hover:text-primary transition-colors underline"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  {author.name}
-                                </a>
-                              ) : (
-                                <span className="text-xs font-medium">{author.name}</span>
-                              )}
-                              {index < item.author.length - 1 && <span className="text-xs text-muted-foreground">,</span>}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
 
-                      {/* Submitted By Information */}
-                      <div className="border-t border-border/50 pt-2">
-                        <h4 className="font-headline text-xs font-bold uppercase tracking-wide mb-1">
-                          {isTwitterSource ? 'SUBMITTED BY' : 'SOURCE'}
-                        </h4>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-medium">{item.source.title}</span>
-                          {isTwitterSource && (
-                            <a
-                              href={item.link}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-xs text-primary hover:text-primary/80 transition-colors underline flex items-center gap-1"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              View on X
-                              <Twitter className="w-3 h-3" />
-                            </a>
-                          )}
-                        </div>
+              {/* Article title (repeated for context) */}
+              <div>
+                <h1 className="font-headline text-lg sm:text-xl font-bold text-foreground leading-tight mb-2">
+                  {item.title}
+                </h1>
+              </div>
+
+              {/* Source and Links */}
+              <div className="bg-accent/10 p-3 rounded border border-border">
+                <h4 className="font-headline text-xs font-bold uppercase tracking-wide mb-2">
+                  SOURCE INFORMATION
+                </h4>
+                <div className="space-y-2 text-xs">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-medium">Source:</span>
+                    <span>{item.source.title}</span>
+                    {item.source.url && (
+                      <a
+                        href={item.source.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:text-primary/80 underline"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Visit Source
+                      </a>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-medium">Original:</span>
+                    <a
+                      href={item.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:text-primary/80 underline break-all"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {item.link.length > 50 ? item.link.slice(0, 50) + '...' : item.link}
+                    </a>
+                  </div>
+                  {item.guid && item.guid !== item.id && (
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">GUID:</span>
+                      <span className="font-mono text-xs">{item.guid.slice(-12)}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Categories/Tags */}
+              {item.category.length > 0 && (
+                <div>
+                  <h4 className="font-headline text-xs font-bold uppercase tracking-wide mb-2">
+                    CATEGORIES & TAGS
+                  </h4>
+                  <div className="flex flex-wrap gap-1 sm:gap-2">
+                    {item.category.map((cat, index) => (
+                      <Badge key={index} variant="outline" className="text-xs font-sans font-medium border-2 border-border uppercase">
+                        {cat.name}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Author Information */}
+              {item.author.length > 0 && (
+                <div className="bg-accent/10 p-3 rounded border border-border">
+                  <div className="space-y-2">
+                    {/* Author Information */}
+                    <div>
+                      <h4 className="font-headline text-xs font-bold uppercase tracking-wide mb-1">
+                        AUTHOR{item.author.length > 1 ? 'S' : ''}
+                      </h4>
+                      <div className="flex flex-wrap gap-1">
+                        {item.author.map((author, index) => (
+                          <div key={index} className="flex items-center gap-1">
+                            {author.link ? (
+                              <a
+                                href={author.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs font-medium hover:text-primary transition-colors underline"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                {author.name}
+                              </a>
+                            ) : (
+                              <span className="text-xs font-medium">{author.name}</span>
+                            )}
+                            {index < item.author.length - 1 && <span className="text-xs text-muted-foreground">,</span>}
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  </div>}
-                
-                <div className="font-body text-sm sm:text-base text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                  {item.content || item.description}
+
+                    {/* Submitted By Information */}
+                    <div className="border-t border-border/50 pt-2">
+                      <h4 className="font-headline text-xs font-bold uppercase tracking-wide mb-1">
+                        {isTwitterSource ? 'SUBMITTED BY' : 'SOURCE'}
+                      </h4>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium">{item.source.title}</span>
+                        {isTwitterSource && (
+                          <a
+                            href={item.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-primary hover:text-primary/80 transition-colors underline flex items-center gap-1"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            View on X
+                            <Twitter className="w-3 h-3" />
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Article Content */}
+              <div>
+                <h4 className="font-headline text-xs font-bold uppercase tracking-wide mb-2">
+                  ARTICLE CONTENT
+                </h4>
+                <div className="font-body text-sm sm:text-base text-foreground leading-relaxed whitespace-pre-wrap bg-accent/5 p-3 rounded border border-border/50">
+                  {item.content && item.content !== item.description ? (
+                    <div>
+                      <div className="mb-3">
+                        <span className="text-xs font-bold uppercase text-muted-foreground">Summary:</span>
+                        <p className="mt-1">{item.description}</p>
+                      </div>
+                      <div>
+                        <span className="text-xs font-bold uppercase text-muted-foreground">Full Content:</span>
+                        <p className="mt-1">{item.content}</p>
+                      </div>
+                    </div>
+                  ) : (
+                    item.content || item.description
+                  )}
                 </div>
               </div>
+
+              {/* Feed Tag if available */}
+              {feedName && (
+                <div className="border-t border-border pt-3">
+                  <h4 className="font-headline text-xs font-bold uppercase tracking-wide mb-2">
+                    RSS FEED
+                  </h4>
+                  <Badge 
+                    variant="outline" 
+                    className="text-xs border-primary/50 bg-primary/10 hover:bg-primary/20 cursor-pointer transition-colors feed-tag"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (feedId && onSwitchToFeed) {
+                        onSwitchToFeed(feedId);
+                      }
+                    }}
+                    title={`Switch to ${feedName} feed`}
+                  >
+                    {feedName}
+                  </Badge>
+                </div>
+              )}
             </div>
           </div>
         </div>
