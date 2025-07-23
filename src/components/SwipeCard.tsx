@@ -268,7 +268,7 @@ export const SwipeCard = ({
               </div>}
 
             {/* Action buttons - newspaper style */}
-            <div className="flex items-center justify-between gap-2 border-t border-border pt-3 relative z-40 pointer-events-auto">
+            <div className="flex items-center justify-center gap-2 border-t border-border pt-3 relative z-40 pointer-events-auto">
               <Button variant="newspaper" size="sm" onClick={e => {
               e.preventDefault();
               e.stopPropagation();
@@ -276,44 +276,6 @@ export const SwipeCard = ({
             }} className="flex items-center gap-1 text-xs pointer-events-auto" title="Listen to article">
                 <Volume2 className="w-3 h-3" />
               </Button>
-              
-              <div className="flex gap-1 pointer-events-auto">
-                {onSaveForLater && <Button variant="newspaper" size="sm" onClick={e => {
-                e.preventDefault();
-                e.stopPropagation();
-                onSaveForLater(item);
-              }} className="px-2 sm:px-3 pointer-events-auto" title="Save for later">
-                    <BookmarkPlus className="w-3 h-3" />
-                  </Button>}
-                
-                <Button variant="newspaper" size="sm" onClick={e => {
-                e.preventDefault();
-                e.stopPropagation();
-                setIsFlipped(!isFlipped);
-              }} className="px-2 sm:px-3 pointer-events-auto" title="Read full article">
-                  <Eye className="w-3 h-3" />
-                </Button>
-                
-                <Button variant="newspaper" size="sm" onClick={e => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (isTwitterSource) {
-                  window.open(item.link, '_blank');
-                } else {
-                  window.open(item.link, '_blank');
-                }
-              }} className="px-2 sm:px-3 pointer-events-auto" title={isTwitterSource ? "Open on Twitter/X" : "Open original"}>
-                  {isTwitterSource ? <Twitter className="w-3 h-3" /> : <ExternalLink className="w-3 h-3" />}
-                </Button>
-                
-                <Button variant="newspaper" size="sm" onClick={e => {
-                e.preventDefault();
-                e.stopPropagation();
-                onShare(item);
-              }} className="px-2 sm:px-3 pointer-events-auto" title="Share article">
-                  <Share2 className="w-3 h-3" />
-                </Button>
-              </div>
             </div>
           </div>
 
