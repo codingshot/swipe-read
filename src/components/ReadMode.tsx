@@ -339,27 +339,23 @@ export const ReadMode = () => {
                 </div>
               )}
               
-              {/* Today's stats */}
+              {/* History stats - clickable to open popup */}
               <div className="border-2 border-border p-3 sm:p-4 space-y-2 bg-muted/20">
-                <div className="text-sm font-sans font-bold uppercase tracking-wide">TODAY'S EDITION</div>
-                <div className="grid grid-cols-2 gap-2 text-xs sm:text-sm">
-                  <div className="text-left">
-                    <span className="font-sans font-medium">READ:</span>
-                    <span className="font-bold ml-1">{dailyStats.todayRead}</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="font-sans font-medium">LIKED:</span>
-                    <span className="font-bold ml-1">{dailyStats.todayLiked}</span>
-                  </div>
-                  <div className="text-left">
-                    <span className="font-sans font-medium">SAVED:</span>
-                    <span className="font-bold ml-1">{dailyStats.todayBookmarked}</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="font-sans font-medium">GOAL:</span>
-                    <span className="font-bold ml-1">{dailyStats.dailyGoal}</span>
-                  </div>
-                </div>
+                <NavigationFeatures
+                  readArticles={readArticles}
+                  swipeActions={swipeActions}
+                  feeds={feeds}
+                  currentFeed={selectedFeeds[0] || 'multi'}
+                  onUpdateSwipeAction={updateSwipeAction}
+                  onViewSavedStories={handleViewSavedStories}
+                  onSwitchToFeed={handleSwitchToSingleFeed}
+                  onMarkAsUnread={markAsUnread}
+                  onMarkMultipleAsUnread={markMultipleAsUnread}
+                  savedCount={savedForLaterArticles.length}
+                  className="relative static left-auto bottom-auto"
+                  renderAsHistorySection={true}
+                  dailyStats={dailyStats}
+                />
               </div>
             </div>
             

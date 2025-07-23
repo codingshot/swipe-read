@@ -18,6 +18,13 @@ interface NavigationFeaturesProps {
   onMarkMultipleAsUnread: (itemIds: string[]) => void;
   savedCount: number;
   className?: string;
+  renderAsHistorySection?: boolean;
+  dailyStats?: {
+    todayRead: number;
+    todayLiked: number;
+    todayBookmarked: number;
+    dailyGoal: number;
+  };
 }
 
 export const NavigationFeatures = ({ 
@@ -31,9 +38,55 @@ export const NavigationFeatures = ({
   onMarkAsUnread,
   onMarkMultipleAsUnread,
   savedCount,
-  className 
+  className,
+  renderAsHistorySection = false,
+  dailyStats
 }: NavigationFeaturesProps) => {
   const readCount = readArticles.length;
+  
+  // Render as History section for "All caught up" page
+  if (renderAsHistorySection && dailyStats) {
+    return (
+      <div className="space-y-2">
+        <ReadStoriesPopup 
+          readArticles={readArticles}
+          swipeActions={swipeActions}
+          feeds={feeds}
+          currentFeed={currentFeed}
+          onUpdateSwipeAction={onUpdateSwipeAction}
+          onSwitchToFeed={onSwitchToFeed}
+          onMarkAsUnread={onMarkAsUnread}
+          onMarkMultipleAsUnread={onMarkMultipleAsUnread}
+          trigger={
+            <button className="w-full text-left">
+              <div className="text-sm font-sans font-bold uppercase tracking-wide cursor-pointer hover:text-primary transition-colors">
+                HISTORY
+              </div>
+            </button>
+          }
+        />
+        <div className="grid grid-cols-2 gap-2 text-xs sm:text-sm">
+          <div className="text-left">
+            <span className="font-sans font-medium">READ:</span>
+            <span className="font-bold ml-1">{dailyStats.todayRead}</span>
+          </div>
+          <div className="text-right">
+            <span className="font-sans font-medium">LIKED:</span>
+            <span className="font-bold ml-1">{dailyStats.todayLiked}</span>
+          </div>
+          <div className="text-left">
+            <span className="font-sans font-medium">SAVED:</span>
+            <span className="font-bold ml-1">{dailyStats.todayBookmarked}</span>
+          </div>
+          <div className="text-right">
+            <span className="font-sans font-medium">GOAL:</span>
+            <span className="font-bold ml-1">{dailyStats.dailyGoal}</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <div className={cn(
       "fixed left-1 sm:left-2 bottom-24 sm:bottom-20 z-30 flex flex-col gap-2 sm:gap-3",

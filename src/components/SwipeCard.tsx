@@ -256,13 +256,13 @@ export const SwipeCard = ({
   const cardElevation = isDragging ? 24 : 0; // Increased shadow when dragging
   const skew = dragOffset.x * 0.08; // More pronounced skew
   const verticalOffset = Math.abs(dragOffset.x) * 0.1; // Slight lift when dragging horizontally
-  return <div ref={cardRef} data-card-index={dataCardIndex} className={cn("relative w-full max-w-sm mx-auto cursor-grab active:cursor-grabbing", "transform-gpu transition-all duration-200", isDragging ? "transition-none z-50" : "transition-all duration-300 ease-out", className)} style={{
+  return <div ref={cardRef} data-card-index={dataCardIndex} className={cn("relative w-full max-w-sm mx-auto cursor-grab active:cursor-grabbing", "transform-gpu", isDragging ? "transition-none z-50" : "transition-all duration-300 ease-out", className)} style={{
     transform: `translate(${dragOffset.x}px, ${dragOffset.y - verticalOffset}px) rotate(${rotation}deg) scale(${scale}) skewX(${skew}deg)`,
     filter: `drop-shadow(0 ${cardElevation}px ${cardElevation * 1.5}px rgba(0,0,0,0.3))`,
     transition: isDragging ? 'none' : 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
     willChange: 'transform, filter',
     ...style
-  }} onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleEnd} onMouseLeave={handleEnd} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleEnd} onClick={handleCardClick}>
+  }} onMouseDown={handleMouseDown} onMouseMove={isDragging ? handleMouseMove : undefined} onMouseUp={handleEnd} onMouseLeave={handleEnd} onTouchStart={handleTouchStart} onTouchMove={isDragging ? handleTouchMove : undefined} onTouchEnd={handleEnd} onClick={handleCardClick}>
       <Card className={cn("h-[450px] sm:h-[550px] swipe-card overflow-hidden relative animate-fade-in", isDragging ? "dragging shadow-elevated border-4 bg-background/95 backdrop-blur-sm" : "hover:shadow-elevated transition-all duration-200", "bg-background border-2 border-foreground")}>
         {getSwipeIndicator()}
         
