@@ -56,17 +56,25 @@ export const SwipeCard = ({
   const cardRef = useRef<HTMLDivElement>(null);
   const startPos = useRef({ x: 0, y: 0 });
 
-  // Typing animations
+  // Clip description for front view (mobile responsive)
+  const getClippedDescription = () => {
+    const maxLength = window.innerWidth < 640 ? 120 : 200; // Shorter on mobile
+    return item.description.length > maxLength 
+      ? item.description.substring(0, maxLength) + '...'
+      : item.description;
+  };
+
+  // Smoother typing animations
   const titleAnimation = useTypingAnimation({ 
     text: item.title, 
-    speed: 30, 
-    delay: 200 
+    speed: 20, 
+    delay: 100 
   });
   
   const descriptionAnimation = useTypingAnimation({ 
-    text: item.description, 
-    speed: 15, 
-    delay: titleAnimation.isComplete ? 300 : 2000 
+    text: getClippedDescription(), 
+    speed: 10, 
+    delay: titleAnimation.isComplete ? 200 : 1500 
   });
 
   const formatTimeAgo = (dateString: string) => {

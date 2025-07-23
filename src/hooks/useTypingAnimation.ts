@@ -8,7 +8,7 @@ interface UseTypingAnimationProps {
 
 export const useTypingAnimation = ({ 
   text, 
-  speed = 50, 
+  speed = 25, 
   delay = 0 
 }: UseTypingAnimationProps) => {
   const [displayedText, setDisplayedText] = useState('');
@@ -38,4 +38,12 @@ export const useTypingAnimation = ({
   }, [text, speed, delay]);
 
   return { displayedText, isComplete };
+};
+
+// Calculate reading time based on word count (average 200 words per minute)
+export const calculateReadingTime = (text: string, titleText: string = ''): number => {
+  const combinedText = titleText + ' ' + text;
+  const wordCount = combinedText.split(/\s+/).length;
+  const readingTimeMinutes = wordCount / 200; // 200 words per minute average
+  return Math.max(3, Math.ceil(readingTimeMinutes * 60)); // Minimum 3 seconds, convert to seconds
 };

@@ -21,9 +21,11 @@ export const SwipeActions = ({
 }: SwipeActionsProps) => {
   return (
     <div className={cn(
-      "flex items-center justify-center gap-3 sm:gap-4 py-4 sm:py-6 px-4",
+      "flex items-center justify-center gap-2 sm:gap-4 py-4 sm:py-6 px-4",
       className
     )}>
+      {/* All buttons same size - square design */}
+      
       {/* Undo button */}
       <Button
         variant="newspaper"
@@ -31,7 +33,7 @@ export const SwipeActions = ({
         onClick={onUndo}
         disabled={!canUndo}
         className={cn(
-          "h-10 w-10 sm:h-12 sm:w-12 transition-all duration-200 flex-shrink-0",
+          "h-12 w-12 sm:h-14 sm:w-14 transition-all duration-200 flex-shrink-0 p-0",
           canUndo 
             ? "hover:scale-110 hover:shadow-elevated active:animate-press" 
             : "opacity-50 cursor-not-allowed"
@@ -45,9 +47,9 @@ export const SwipeActions = ({
         variant="newspaper"
         size="lg"
         onClick={onDismiss}
-        className="h-12 w-12 sm:h-16 sm:w-16 border-destructive text-destructive hover:bg-destructive hover:text-white hover:scale-110 transition-all duration-200 hover:shadow-elevated active:animate-press flex-shrink-0"
+        className="h-12 w-12 sm:h-14 sm:w-14 border-destructive text-destructive hover:bg-destructive hover:text-white hover:scale-110 transition-all duration-200 hover:shadow-elevated active:animate-press flex-shrink-0 p-0"
       >
-        <X className="w-5 h-5 sm:w-6 sm:h-6" />
+        <X className="w-4 h-4 sm:w-5 sm:h-5" />
       </Button>
 
       {/* Bookmark button */}
@@ -55,7 +57,7 @@ export const SwipeActions = ({
         variant="newspaper"
         size="lg"
         onClick={onBookmark}
-        className="h-10 w-10 sm:h-12 sm:w-12 border-primary text-primary hover:bg-primary hover:text-primary-foreground hover:scale-110 transition-all duration-200 hover:shadow-elevated active:animate-press flex-shrink-0"
+        className="h-12 w-12 sm:h-14 sm:w-14 border-primary text-primary hover:bg-primary hover:text-primary-foreground hover:scale-110 transition-all duration-200 hover:shadow-elevated active:animate-press flex-shrink-0 p-0"
       >
         <Bookmark className="w-4 h-4 sm:w-5 sm:h-5" />
       </Button>
@@ -65,9 +67,9 @@ export const SwipeActions = ({
         variant="newspaper"
         size="lg"
         onClick={onLike}
-        className="h-12 w-12 sm:h-16 sm:w-16 border-success text-success hover:bg-success hover:text-white hover:scale-110 transition-all duration-200 hover:shadow-elevated active:animate-press flex-shrink-0"
+        className="h-12 w-12 sm:h-14 sm:w-14 border-success text-success hover:bg-success hover:text-white hover:scale-110 transition-all duration-200 hover:shadow-elevated active:animate-press flex-shrink-0 p-0"
       >
-        <Heart className="w-5 h-5 sm:w-6 sm:h-6" />
+        <Heart className="w-4 h-4 sm:w-5 sm:h-5" />
       </Button>
     </div>
   );

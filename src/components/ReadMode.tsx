@@ -6,6 +6,7 @@ import { VerticalProgress } from './VerticalProgress';
 import { ComingSoonFeatures } from './ComingSoonFeatures';
 import { useNewsData } from '@/hooks/useNewsData';
 import { useSpeech } from '@/hooks/useSpeech';
+import { calculateReadingTime } from '@/hooks/useTypingAnimation';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -38,16 +39,19 @@ export const ReadMode = () => {
   const currentArticle = unreadArticles[currentIndex];
   const isAllCaughtUp = !currentArticle || currentIndex >= unreadArticles.length;
 
-  // Auto-play functionality
+  // Auto-play functionality with reading time calculation
   useEffect(() => {
-    if (isAutoPlay && !isAllCaughtUp) {
+    if (isAutoPlay && !isAllCaughtUp && currentArticle) {
+      const readingTime = calculateReadingTime(currentArticle.description, currentArticle.title);
+      const autoPlayDelay = Math.max(5000, readingTime * 1000); // Minimum 5 seconds or calculated reading time
+      
       const interval = setInterval(() => {
         if (currentIndex < unreadArticles.length - 1) {
           setCurrentIndex(currentIndex + 1);
         } else {
           setIsAutoPlay(false);
         }
-      }, 5000); // 5 seconds per article
+      }, autoPlayDelay);
 
       setAutoPlayInterval(interval);
       return () => clearInterval(interval);
@@ -55,7 +59,7 @@ export const ReadMode = () => {
       clearInterval(autoPlayInterval);
       setAutoPlayInterval(null);
     }
-  }, [isAutoPlay, currentIndex, unreadArticles.length, isAllCaughtUp, setCurrentIndex]);
+  }, [isAutoPlay, currentIndex, unreadArticles.length, isAllCaughtUp, setCurrentIndex, currentArticle]);
 
   const handleToggleAutoPlay = () => {
     setIsAutoPlay(!isAutoPlay);
