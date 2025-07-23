@@ -51,7 +51,7 @@ export const ReadMode = () => {
     changeDailyGoal,
     canUndo,
     updateSwipeAction
-  } = useNewsData('day', getCurrentFeedUrl());
+  } = useNewsData('day', getCurrentFeedUrl(), currentFeed, feeds.find(f => f.id === currentFeed)?.name);
 
   const { speak } = useSpeech();
   const [isAutoPlay, setIsAutoPlay] = useState(false);
@@ -154,6 +154,10 @@ export const ReadMode = () => {
     if (article) {
       saveForLater(article);
     }
+  };
+
+  const handleSwitchToFeed = (feedId: string) => {
+    changeFeed(feedId);
   };
 
   const handleViewReadStories = () => {
@@ -368,9 +372,12 @@ export const ReadMode = () => {
       <NavigationFeatures
         readArticles={readArticles}
         swipeActions={swipeActions}
+        feeds={feeds}
+        currentFeed={currentFeed}
         onUpdateSwipeAction={updateSwipeAction}
-        savedCount={savedForLaterArticles.length}
         onViewSavedStories={handleViewSavedStories}
+        onSwitchToFeed={handleSwitchToFeed}
+        savedCount={savedForLaterArticles.length}
       />
 
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-300px)] sm:min-h-[calc(100vh-260px)] p-4 sm:p-8 relative px-16 sm:px-20 pb-32 sm:pb-24">

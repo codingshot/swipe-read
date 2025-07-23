@@ -4,22 +4,29 @@ import { History, BookmarkCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { NewsItem, SwipeAction } from '@/hooks/useNewsData';
 import { ReadStoriesPopup } from './ReadStoriesPopup';
+import { Feed } from './FeedSelector';
 
 interface NavigationFeaturesProps {
   readArticles: NewsItem[];
   swipeActions: SwipeAction[];
+  feeds: Feed[];
+  currentFeed: string;
   onUpdateSwipeAction: (itemId: string, newAction: 'like' | 'dismiss' | 'bookmark') => void;
-  savedCount: number;
   onViewSavedStories: () => void;
+  onSwitchToFeed: (feedId: string) => void;
+  savedCount: number;
   className?: string;
 }
 
 export const NavigationFeatures = ({ 
   readArticles,
   swipeActions,
+  feeds,
+  currentFeed,
   onUpdateSwipeAction,
-  savedCount,
   onViewSavedStories,
+  onSwitchToFeed,
+  savedCount,
   className 
 }: NavigationFeaturesProps) => {
   const readCount = readArticles.length;
@@ -32,7 +39,10 @@ export const NavigationFeatures = ({
         <ReadStoriesPopup 
           readArticles={readArticles}
           swipeActions={swipeActions}
+          feeds={feeds}
+          currentFeed={currentFeed}
           onUpdateSwipeAction={onUpdateSwipeAction}
+          onSwitchToFeed={onSwitchToFeed}
           trigger={
           <div className="relative group">
             <Button

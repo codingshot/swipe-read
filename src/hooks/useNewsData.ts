@@ -32,6 +32,8 @@ export interface SwipeAction {
   itemId: string;
   action: 'like' | 'dismiss' | 'bookmark';
   timestamp: number;
+  feedId?: string;
+  feedName?: string;
 }
 
 export type TimeFilter = 'day' | 'week' | 'month' | 'before' | 'all' | 'demo';
@@ -46,7 +48,7 @@ const STORAGE_KEYS = {
   DAILY_GOAL: 'read_mode_daily_goal'
 };
 
-export const useNewsData = (initialTimeFilter: TimeFilter = 'day', feedUrl?: string) => {
+export const useNewsData = (initialTimeFilter: TimeFilter = 'day', feedUrl?: string, currentFeedId?: string, currentFeedName?: string) => {
   const [articles, setArticles] = useState<NewsItem[]>([]);
   const [allArticles, setAllArticles] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -234,7 +236,7 @@ export const useNewsData = (initialTimeFilter: TimeFilter = 'day', feedUrl?: str
     };
 
     fetchArticles();
-  }, [toast, timeFilter, feedUrl]);
+  }, [toast, timeFilter, feedUrl, currentFeedId]);
 
   // Change time filter
   const changeTimeFilter = async (newFilter: TimeFilter) => {
@@ -299,7 +301,9 @@ export const useNewsData = (initialTimeFilter: TimeFilter = 'day', feedUrl?: str
     const action: SwipeAction = {
       itemId: item.id,
       action: direction === 'right' ? 'like' : 'dismiss',
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      feedId: currentFeedId,
+      feedName: currentFeedName
     };
 
     const newActions = [...swipeActions, action];
@@ -326,7 +330,9 @@ export const useNewsData = (initialTimeFilter: TimeFilter = 'day', feedUrl?: str
     const action: SwipeAction = {
       itemId: item.id,
       action: 'bookmark',
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      feedId: currentFeedId,
+      feedName: currentFeedName
     };
 
     const newActions = [...swipeActions, action];
@@ -484,14 +490,18 @@ export const useNewsData = (initialTimeFilter: TimeFilter = 'day', feedUrl?: str
         updatedActions[existingActionIndex] = {
           ...updatedActions[existingActionIndex],
           action: newAction,
-          timestamp: Date.now()
+          timestamp: Date.now(),
+          feedId: currentFeedId,
+          feedName: currentFeedName
         };
       } else {
         // Add new action
         updatedActions.push({
           itemId,
           action: newAction,
-          timestamp: Date.now()
+          timestamp: Date.now(),
+          feedId: currentFeedId,
+          feedName: currentFeedName
         });
       }
       
