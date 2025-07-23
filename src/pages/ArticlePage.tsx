@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link, Navigate } from 'react-router-dom';
+import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -7,31 +7,49 @@ import { ArrowLeft, ExternalLink, Share2, Volume2, Clock, Twitter } from 'lucide
 import { NewsItem } from '@/hooks/useNewsData';
 import { useSpeech } from '@/hooks/useSpeech';
 import { useToast } from '@/hooks/use-toast';
-
-const RSS_API_URL = 'https://grants-rss.up.railway.app/api/items';
+import { useFeedData } from '@/hooks/useFeedData';
 
 export const ArticlePage = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [article, setArticle] = useState<NewsItem | null>(null);
+  const [articleFeedId, setArticleFeedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { speak } = useSpeech();
   const { toast } = useToast();
+  const { feeds, changeFeed } = useFeedData();
 
   useEffect(() => {
     const fetchArticle = async () => {
       try {
         setLoading(true);
-        const response = await fetch(RSS_API_URL);
-        if (!response.ok) {
-          throw new Error('Failed to fetch articles');
+        
+        // Try to find the article in all feeds
+        let foundArticle: NewsItem | null = null;
+        let foundFeedId: string | null = null;
+        
+        for (const feed of feeds) {
+          try {
+            const response = await fetch(feed.rssUrl);
+            if (response.ok) {
+              const articles: NewsItem[] = await response.json();
+              const article = articles.find(a => a.id === id);
+              if (article) {
+                foundArticle = article;
+                foundFeedId = feed.id;
+                break;
+              }
+            }
+          } catch (err) {
+            // Continue to next feed if this one fails
+            console.log(`Failed to fetch from ${feed.name}:`, err);
+          }
         }
         
-        const articles: NewsItem[] = await response.json();
-        const foundArticle = articles.find(a => a.id === id);
-        
-        if (foundArticle) {
+        if (foundArticle && foundFeedId) {
           setArticle(foundArticle);
+          setArticleFeedId(foundFeedId);
         } else {
           setError('Article not found');
         }
@@ -42,10 +60,10 @@ export const ArticlePage = () => {
       }
     };
 
-    if (id) {
+    if (id && feeds.length > 0) {
       fetchArticle();
     }
-  }, [id]);
+  }, [id, feeds]);
 
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
@@ -91,6 +109,15 @@ export const ArticlePage = () => {
         });
       }
     }
+  };
+
+  const handleContinueReading = () => {
+    // If we found the article in a specific feed, switch to that feed
+    if (articleFeedId) {
+      changeFeed(articleFeedId);
+    }
+    // Navigate to the main page (ReadMode)
+    navigate('/');
   };
 
   const isTwitterSource = article && (
@@ -189,12 +216,10 @@ export const ArticlePage = () => {
 
           {/* Actions */}
           <div className="flex items-center justify-between">
-            <Link to="/">
-              <Button variant="newspaper">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                CONTINUE READING
-              </Button>
-            </Link>
+            <Button variant="newspaper" onClick={handleContinueReading}>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              CONTINUE READING
+            </Button>
             
             <div className="flex gap-2">
               {isTwitterSource && (
