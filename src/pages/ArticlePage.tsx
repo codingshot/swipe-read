@@ -8,6 +8,7 @@ import { NewsItem } from '@/hooks/useNewsData';
 import { useSpeech } from '@/hooks/useSpeech';
 import { useToast } from '@/hooks/use-toast';
 import { useFeedData } from '@/hooks/useFeedData';
+import { useSEO } from '@/hooks/useSEO';
 
 export const ArticlePage = () => {
   const { id } = useParams<{ id: string }>();
@@ -64,6 +65,22 @@ export const ArticlePage = () => {
       fetchArticle();
     }
   }, [id, feeds]);
+
+  // SEO meta tags for the article
+  useSEO({
+    title: article ? `${article.title} | ReadMode by Curate.Fun` : undefined,
+    description: article ? article.description.slice(0, 160) + (article.description.length > 160 ? '...' : '') : undefined,
+    keywords: article ? `${article.category.map(cat => cat.name).join(', ')}, news, ${article.source.title}` : undefined,
+    author: article?.author.length ? article.author.map(a => a.name).join(', ') : 'Curate.Fun',
+    ogTitle: article ? article.title : undefined,
+    ogDescription: article ? article.description.slice(0, 160) + (article.description.length > 160 ? '...' : '') : undefined,
+    ogUrl: article ? window.location.href : undefined,
+    ogImage: '/lovable-uploads/1d75c33b-437e-4cfe-be6b-57c7cd5be98c.png',
+    twitterTitle: article ? article.title : undefined,
+    twitterDescription: article ? article.description.slice(0, 160) + (article.description.length > 160 ? '...' : '') : undefined,
+    twitterImage: '/lovable-uploads/1d75c33b-437e-4cfe-be6b-57c7cd5be98c.png',
+    canonical: article ? window.location.href : undefined
+  });
 
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
