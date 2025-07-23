@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Settings, Filter, TrendingUp, PlayCircle, PauseCircle, Calendar, Clock, Zap, Newspaper } from 'lucide-react';
+import { Settings, Filter, TrendingUp, PlayCircle, PauseCircle, Calendar, Clock, Zap, Newspaper, Volume2, VolumeX } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TimeFilter } from '@/hooks/useNewsData';
 import { FeedSelector, Feed } from './FeedSelector';
@@ -13,10 +13,12 @@ interface ReadModeHeaderProps {
   todayRead: number;
   dailyGoal: number;
   isAutoPlay: boolean;
+  autoRead?: boolean;
   timeFilter: TimeFilter;
   feeds: Feed[];
   currentFeed: string;
   onToggleAutoPlay: () => void;
+  onToggleAutoRead?: () => void;
   onTimeFilterChange: (filter: TimeFilter) => void;
   onFeedChange: (feedId: string) => void;
   onOpenSettings: () => void;
@@ -29,10 +31,12 @@ export const ReadModeHeader = ({
   todayRead,
   dailyGoal,
   isAutoPlay,
+  autoRead = false,
   timeFilter,
   feeds,
   currentFeed,
   onToggleAutoPlay,
+  onToggleAutoRead,
   onTimeFilterChange,
   onFeedChange,
   onOpenSettings,
@@ -100,6 +104,23 @@ export const ReadModeHeader = ({
                 <PlayCircle className="w-3 h-3 sm:w-4 sm:h-4" />
               )}
             </Button>
+
+            {/* Audio toggle - only visible in auto-play mode */}
+            {isAutoPlay && onToggleAutoRead && (
+              <Button
+                variant="newspaper"
+                size="sm"
+                onClick={onToggleAutoRead}
+                className="h-6 w-6 sm:h-8 sm:w-8 p-0 text-xs"
+                title={autoRead ? "Turn off auto-read" : "Turn on auto-read"}
+              >
+                {autoRead ? (
+                  <Volume2 className="w-3 h-3 sm:w-4 sm:h-4" />
+                ) : (
+                  <VolumeX className="w-3 h-3 sm:w-4 sm:h-4" />
+                )}
+              </Button>
+            )}
             
             <Select value={timeFilter} onValueChange={onTimeFilterChange}>
               <SelectTrigger className="h-6 w-16 sm:h-8 sm:w-20 border-2 border-border bg-background text-xs">

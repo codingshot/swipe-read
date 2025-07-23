@@ -33,9 +33,14 @@ export const useSpeech = () => {
     // Try to use a more natural voice if available
     const voices = window.speechSynthesis.getVoices();
     const preferredVoice = voices.find(voice => 
+      voice.name.includes('Samantha') || // macOS natural voice
+      voice.name.includes('Karen') ||    // Windows natural voice
+      voice.name.includes('Zira') ||     // Windows natural voice
       voice.name.includes('Natural') || 
       voice.name.includes('Neural') ||
-      voice.name.includes('Premium')
+      voice.name.includes('Premium') ||
+      voice.name.includes('Enhanced') ||
+      (voice.lang.startsWith('en') && voice.localService)
     ) || voices.find(voice => voice.lang.startsWith('en')) || voices[0];
 
     if (preferredVoice) {

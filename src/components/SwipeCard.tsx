@@ -249,9 +249,8 @@ export const SwipeCard = ({
               e.preventDefault();
               e.stopPropagation();
               onSpeak(item.title + '. ' + getClippedDescription());
-            }} className="flex items-center gap-1 text-xs flex-1 max-w-20 sm:max-w-24 pointer-events-auto">
+            }} className="flex items-center gap-1 text-xs pointer-events-auto" title="Listen to article">
                 <Volume2 className="w-3 h-3" />
-                <span className="hidden sm:inline">LISTEN</span>
               </Button>
               
               <div className="flex gap-1 pointer-events-auto">

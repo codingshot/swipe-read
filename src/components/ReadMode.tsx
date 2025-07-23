@@ -53,10 +53,11 @@ export const ReadMode = () => {
     updateSwipeAction
   } = useNewsData('day', getCurrentFeedUrl(), currentFeed, feeds.find(f => f.id === currentFeed)?.name);
 
-  const { speak } = useSpeech();
+  const { speak, stop, isSpeaking } = useSpeech();
   const [isAutoPlay, setIsAutoPlay] = useState(false);
   const [autoPlayInterval, setAutoPlayInterval] = useState<NodeJS.Timeout | null>(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [autoRead, setAutoRead] = useState(false);
 
   const currentArticle = unreadArticles[currentIndex];
   const isAllCaughtUp = !currentArticle || currentIndex >= unreadArticles.length;
@@ -64,24 +65,42 @@ export const ReadMode = () => {
   // Auto-play functionality with reading time calculation
   useEffect(() => {
     if (isAutoPlay && !isAllCaughtUp && currentArticle) {
+      // Start auto-read if enabled
+      if (autoRead) {
+        const textToSpeak = currentArticle.title + '. ' + currentArticle.description;
+        speak(textToSpeak);
+      }
+
       const readingTime = calculateReadingTime(currentArticle.description, currentArticle.title);
       const autoPlayDelay = Math.max(5000, readingTime * 1000); // Minimum 5 seconds or calculated reading time
       
       const interval = setInterval(() => {
+        // Stop speaking when moving to next card
+        if (isSpeaking) {
+          stop();
+        }
+        
         if (currentIndex < unreadArticles.length - 1) {
           setCurrentIndex(currentIndex + 1);
         } else {
           setIsAutoPlay(false);
+          setAutoRead(false);
         }
       }, autoPlayDelay);
 
       setAutoPlayInterval(interval);
-      return () => clearInterval(interval);
+      return () => {
+        clearInterval(interval);
+        // Stop speaking when auto-play stops
+        if (isSpeaking) {
+          stop();
+        }
+      };
     } else if (autoPlayInterval) {
       clearInterval(autoPlayInterval);
       setAutoPlayInterval(null);
     }
-  }, [isAutoPlay, currentIndex, unreadArticles.length, isAllCaughtUp, setCurrentIndex, currentArticle]);
+  }, [isAutoPlay, currentIndex, unreadArticles.length, isAllCaughtUp, setCurrentIndex, currentArticle, autoRead, speak, stop, isSpeaking]);
 
   // Get current auto-play delay for timer display
   const getCurrentAutoPlayDelay = () => {
@@ -135,7 +154,20 @@ export const ReadMode = () => {
   }, [handleLike, handleDismiss]);
 
   const handleToggleAutoPlay = () => {
-    setIsAutoPlay(!isAutoPlay);
+    const newAutoPlay = !isAutoPlay;
+    setIsAutoPlay(newAutoPlay);
+    
+    // Reset auto-read when toggling auto-play
+    if (!newAutoPlay) {
+      setAutoRead(false);
+      if (isSpeaking) {
+        stop();
+      }
+    }
+  };
+
+  const handleToggleAutoRead = () => {
+    setAutoRead(!autoRead);
   };
 
   const handleBookmarkAction = () => {
@@ -348,10 +380,12 @@ export const ReadMode = () => {
         todayRead={dailyStats.todayRead}
         dailyGoal={dailyStats.dailyGoal}
         isAutoPlay={isAutoPlay}
+        autoRead={autoRead}
         timeFilter={timeFilter}
         feeds={feeds}
         currentFeed={currentFeed}
         onToggleAutoPlay={handleToggleAutoPlay}
+        onToggleAutoRead={handleToggleAutoRead}
         onTimeFilterChange={changeTimeFilter}
         onFeedChange={changeFeed}
         onOpenSettings={() => setShowSettings(true)}
@@ -417,14 +451,17 @@ export const ReadMode = () => {
         </div>
       </div>
 
-      <SwipeActions
-        onLike={handleLike}
-        onDismiss={handleDismiss}
-        onUndo={undoLastAction}
-        onBookmark={handleBookmarkAction}
-        canUndo={canUndo}
-        className="fixed bottom-6 sm:bottom-8 left-0 right-0 z-50 pointer-events-auto"
-      />
+      {/* Swipe Actions - Hidden in auto-play mode to save space */}
+      {!isAutoPlay && (
+        <SwipeActions
+          onLike={handleLike}
+          onDismiss={handleDismiss}
+          onUndo={undoLastAction}
+          onBookmark={handleBookmarkAction}
+          canUndo={canUndo}
+          className="fixed bottom-6 sm:bottom-8 left-0 right-0 z-50 pointer-events-auto"
+        />
+      )}
 
       {/* Settings Popup */}
       <SettingsPopup
