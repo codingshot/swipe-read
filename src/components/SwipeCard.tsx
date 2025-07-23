@@ -325,13 +325,10 @@ export const SwipeCard = ({
                 </div>
                 
                 {/* Article metadata row */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
+                <div className="text-xs text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <Clock className="w-3 h-3" />
                     <span>Published: {new Date(item.date).toLocaleDateString()} at {new Date(item.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span>ID: {item.id.slice(-8)}</span>
                   </div>
                 </div>
               </div>
@@ -343,47 +340,6 @@ export const SwipeCard = ({
                 </h1>
               </div>
 
-              {/* Source and Links */}
-              <div className="bg-accent/10 p-3 rounded border border-border">
-                <h4 className="font-headline text-xs font-bold uppercase tracking-wide mb-2">
-                  SOURCE INFORMATION
-                </h4>
-                <div className="space-y-2 text-xs">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-medium">Source:</span>
-                    <span>{item.source.title}</span>
-                    {item.source.url && (
-                      <a
-                        href={item.source.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:text-primary/80 underline"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        Visit Source
-                      </a>
-                    )}
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-medium">Original:</span>
-                    <a
-                      href={item.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary hover:text-primary/80 underline break-all"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {item.link.length > 50 ? item.link.slice(0, 50) + '...' : item.link}
-                    </a>
-                  </div>
-                  {item.guid && item.guid !== item.id && (
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">GUID:</span>
-                      <span className="font-mono text-xs">{item.guid.slice(-12)}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
 
               {/* Categories/Tags */}
               {item.category.length > 0 && (
