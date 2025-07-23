@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Settings, Filter, TrendingUp, PlayCircle, PauseCircle, Calendar, Clock, Zap, Newspaper, Volume2, VolumeX } from 'lucide-react';
+import { Settings, Filter, TrendingUp, PlayCircle, PauseCircle, Calendar, Clock, Zap, Newspaper, Volume2, VolumeX, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TimeFilter } from '@/hooks/useNewsData';
 import { MultiFeedSelector, Feed } from './MultiFeedSelector';
@@ -22,6 +22,7 @@ interface ReadModeHeaderProps {
   onTimeFilterChange: (filter: TimeFilter) => void;
   onFeedChange: (feedIds: string[]) => void;
   onOpenSettings: () => void;
+  onOpenProfile?: () => void;
   className?: string;
 }
 
@@ -40,6 +41,7 @@ export const ReadModeHeader = ({
   onTimeFilterChange,
   onFeedChange,
   onOpenSettings,
+  onOpenProfile,
   className
 }: ReadModeHeaderProps) => {
   const progressPercentage = totalArticles > 0 ? ((currentIndex + 1) / totalArticles) * 100 : 0;
@@ -170,6 +172,18 @@ export const ReadModeHeader = ({
                 </SelectItem>
               </SelectContent>
             </Select>
+            
+            {onOpenProfile && (
+              <Button
+                variant="newspaper"
+                size="sm"
+                onClick={onOpenProfile}
+                className="h-6 w-6 sm:h-8 sm:w-8 p-0"
+                title="My Profile"
+              >
+                <User className="w-3 h-3 sm:w-4 sm:h-4" />
+              </Button>
+            )}
             
             <Button
               variant="newspaper"

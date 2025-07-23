@@ -16,10 +16,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RefreshCw, Coffee, Zap, Archive, Calendar, Clock, Filter, TrendingUp } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { MultiFeedSelector } from './MultiFeedSelector';
 import { cn } from '@/lib/utils';
 
 export const ReadMode = () => {
+  const navigate = useNavigate();
+  
   // Feed management
   const {
     feeds,
@@ -238,6 +241,10 @@ export const ReadMode = () => {
     window.location.reload();
   };
 
+  const handleOpenProfile = () => {
+    navigate('/profile');
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -303,6 +310,7 @@ export const ReadMode = () => {
           onTimeFilterChange={changeTimeFilter}
           onFeedChange={handleFeedChange}
           onOpenSettings={() => setShowSettings(true)}
+          onOpenProfile={handleOpenProfile}
         />
         
         <div className="flex items-center justify-center min-h-[calc(100vh-140px)] p-3 sm:p-4">
@@ -475,6 +483,7 @@ export const ReadMode = () => {
         onTimeFilterChange={changeTimeFilter}
         onFeedChange={handleFeedChange}
         onOpenSettings={() => setShowSettings(true)}
+        onOpenProfile={handleOpenProfile}
       />
       
       {/* Vertical Progress on Left */}
