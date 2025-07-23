@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Heart, X, ExternalLink, Share2, Volume2, Clock, Eye, Bookmark, Twitter } from 'lucide-react';
+import { Heart, X, ExternalLink, Share2, Volume2, Clock, Eye, Bookmark, Twitter, BookmarkPlus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTypingAnimation } from '@/hooks/useTypingAnimation';
 
@@ -38,6 +38,7 @@ interface SwipeCardProps {
   onSwipe: (direction: 'left' | 'right', item: NewsItem) => void;
   onShare: (item: NewsItem) => void;
   onSpeak: (text: string) => void;
+  onSaveForLater?: (item: NewsItem) => void;
   className?: string;
   style?: React.CSSProperties;
 }
@@ -47,6 +48,7 @@ export const SwipeCard = ({
   onSwipe, 
   onShare, 
   onSpeak, 
+  onSaveForLater,
   className, 
   style 
 }: SwipeCardProps) => {
@@ -184,9 +186,10 @@ export const SwipeCard = ({
     return null;
   };
 
-  const rotation = dragOffset.x * 0.15;
-  const scale = isDragging ? 0.98 : 1;
-  const cardElevation = isDragging ? 8 : 0;
+  const rotation = dragOffset.x * 0.2; // Increased rotation for more dramatic effect
+  const scale = isDragging ? 0.95 : 1;
+  const cardElevation = isDragging ? 20 : 0; // Much higher elevation when dragging
+  const skew = dragOffset.x * 0.05; // Add skew effect for more realistic drag
 
   return (
     <div
@@ -198,8 +201,9 @@ export const SwipeCard = ({
         className
       )}
       style={{
-        transform: `translate(${dragOffset.x}px, ${dragOffset.y}px) rotate(${rotation}deg) scale(${scale})`,
-        filter: `drop-shadow(0 ${cardElevation}px ${cardElevation * 2}px rgba(0,0,0,0.15))`,
+        transform: `translate(${dragOffset.x}px, ${dragOffset.y}px) rotate(${rotation}deg) scale(${scale}) skewX(${skew}deg)`,
+        filter: `drop-shadow(0 ${cardElevation}px ${cardElevation * 2}px rgba(0,0,0,0.3)) blur(${isDragging ? 0.5 : 0}px)`,
+        transition: isDragging ? 'none' : 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
         ...style
       }}
       onMouseDown={handleMouseDown}
@@ -287,6 +291,21 @@ export const SwipeCard = ({
               </Button>
               
               <div className="flex gap-1">
+                {onSaveForLater && (
+                  <Button
+                    variant="newspaper"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSaveForLater(item);
+                    }}
+                    className="px-2 sm:px-3"
+                    title="Save for later"
+                  >
+                    <BookmarkPlus className="w-3 h-3" />
+                  </Button>
+                )}
+                
                 <Button
                   variant="newspaper"
                   size="sm"

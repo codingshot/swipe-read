@@ -36,10 +36,6 @@ export const ComingSoonFeatures = ({ className }: ComingSoonFeaturesProps) => {
       "fixed right-2 top-1/2 transform -translate-y-1/2 z-30 flex flex-col gap-3",
       className
     )}>
-      <div className="text-xs font-sans font-bold text-center mb-2 transform rotate-90 origin-center whitespace-nowrap text-muted-foreground">
-        COMING SOON
-      </div>
-      
       {features.map((feature, index) => {
         const Icon = feature.icon;
         return (
@@ -48,24 +44,25 @@ export const ComingSoonFeatures = ({ className }: ComingSoonFeaturesProps) => {
               variant="newspaper"
               size="sm"
               disabled
-              className="w-10 h-10 p-0 opacity-50 cursor-not-allowed relative overflow-hidden"
+              className="w-10 h-10 p-0 opacity-30 cursor-not-allowed hover:opacity-50 transition-opacity duration-200"
               title={`${feature.name} - ${feature.description}`}
             >
               <Icon className="w-4 h-4" />
             </Button>
             
-            {/* Coming Soon Badge */}
+            {/* Coming Soon Badge - only visible on hover */}
             <Badge 
               variant="outline" 
-              className="absolute -top-1 -right-1 text-xs font-sans font-bold border-2 border-border bg-background px-1 py-0 h-auto opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+              className="absolute -top-1 -right-1 text-xs font-sans font-bold border-2 border-border bg-background px-1 py-0 h-auto opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
             >
               SOON
             </Badge>
             
-            {/* Tooltip on hover */}
-            <div className="absolute right-12 top-1/2 transform -translate-y-1/2 bg-background border-2 border-border p-2 rounded-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
-              <div className="text-xs font-sans font-bold">{feature.name}</div>
-              <div className="text-xs text-muted-foreground">{feature.description}</div>
+            {/* Enhanced tooltip on hover */}
+            <div className="absolute right-12 top-1/2 transform -translate-y-1/2 bg-background border-2 border-border p-3 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none whitespace-nowrap z-50 shadow-elevated">
+              <div className="text-sm font-sans font-bold uppercase tracking-wide">{feature.name}</div>
+              <div className="text-xs text-muted-foreground mt-1">{feature.description}</div>
+              <div className="text-xs text-muted-foreground mt-1 italic">Coming soon...</div>
             </div>
           </div>
         );

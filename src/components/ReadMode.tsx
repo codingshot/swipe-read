@@ -4,6 +4,7 @@ import { ReadModeHeader } from './ReadModeHeader';
 import { SwipeActions } from './SwipeActions';
 import { VerticalProgress } from './VerticalProgress';
 import { ComingSoonFeatures } from './ComingSoonFeatures';
+import { NavigationFeatures } from './NavigationFeatures';
 import { useNewsData } from '@/hooks/useNewsData';
 import { useSpeech } from '@/hooks/useSpeech';
 import { calculateReadingTime } from '@/hooks/useTypingAnimation';
@@ -23,8 +24,11 @@ export const ReadMode = () => {
     unreadArticles,
     dailyStats,
     timeFilter,
+    readArticles,
+    savedForLaterArticles,
     handleSwipe,
     handleBookmark,
+    saveForLater,
     undoLastAction,
     shareArticle,
     setCurrentIndex,
@@ -87,6 +91,22 @@ export const ReadMode = () => {
     if (article) {
       shareArticle(article);
     }
+  };
+
+  const handleSaveForLater = (article: typeof currentArticle) => {
+    if (article) {
+      saveForLater(article);
+    }
+  };
+
+  const handleViewReadStories = () => {
+    // TODO: Implement read stories view
+    console.log('View read stories:', readArticles);
+  };
+
+  const handleViewSavedStories = () => {
+    // TODO: Implement saved stories view  
+    console.log('View saved stories:', savedForLaterArticles);
   };
 
   const handleRefresh = () => {
@@ -267,6 +287,14 @@ export const ReadMode = () => {
       {/* Coming Soon Features on Right */}
       <ComingSoonFeatures />
 
+      {/* Navigation Features on Left Bottom */}
+      <NavigationFeatures
+        readCount={readArticles.length}
+        savedCount={savedForLaterArticles.length}
+        onViewReadStories={handleViewReadStories}
+        onViewSavedStories={handleViewSavedStories}
+      />
+
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-220px)] p-2 sm:p-4 relative">
         {/* Demo mode indicator */}
         {timeFilter === 'demo' && (
@@ -288,6 +316,7 @@ export const ReadMode = () => {
                 onSwipe={handleSwipe}
                 onShare={handleShare}
                 onSpeak={speak}
+                onSaveForLater={handleSaveForLater}
                 className={cn(
                   "absolute inset-0 transition-all duration-300 newspaper-enter",
                   index === 0 ? "z-30" : index === 1 ? "z-20" : "z-10"

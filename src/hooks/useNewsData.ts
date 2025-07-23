@@ -42,7 +42,8 @@ const STORAGE_KEYS = {
   SWIPE_ACTIONS: 'read_mode_swipe_actions',
   DAILY_STATS: 'read_mode_daily_stats',
   FILTERS: 'read_mode_filters',
-  TIME_FILTER: 'read_mode_time_filter'
+  TIME_FILTER: 'read_mode_time_filter',
+  SAVED_FOR_LATER: 'read_mode_saved_for_later'
 };
 
 export const useNewsData = (initialTimeFilter: TimeFilter = 'day') => {
@@ -54,6 +55,7 @@ export const useNewsData = (initialTimeFilter: TimeFilter = 'day') => {
   const [swipeActions, setSwipeActions] = useState<SwipeAction[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [timeFilter, setTimeFilter] = useState<TimeFilter>(initialTimeFilter);
+  const [savedForLaterItems, setSavedForLaterItems] = useState<Set<string>>(new Set());
   const { toast } = useToast();
 
   // Load data from localStorage
@@ -61,6 +63,7 @@ export const useNewsData = (initialTimeFilter: TimeFilter = 'day') => {
     const savedReadItems = localStorage.getItem(STORAGE_KEYS.READ_ITEMS);
     const savedSwipeActions = localStorage.getItem(STORAGE_KEYS.SWIPE_ACTIONS);
     const savedTimeFilter = localStorage.getItem(STORAGE_KEYS.TIME_FILTER);
+    const savedForLaterItems = localStorage.getItem(STORAGE_KEYS.SAVED_FOR_LATER);
 
     if (savedReadItems) {
       setReadItems(new Set(JSON.parse(savedReadItems)));
@@ -72,6 +75,10 @@ export const useNewsData = (initialTimeFilter: TimeFilter = 'day') => {
 
     if (savedTimeFilter) {
       setTimeFilter(savedTimeFilter as TimeFilter);
+    }
+
+    if (savedForLaterItems) {
+      setSavedForLaterItems(new Set(JSON.parse(savedForLaterItems)));
     }
   }, []);
 
@@ -354,6 +361,29 @@ export const useNewsData = (initialTimeFilter: TimeFilter = 'day') => {
     }
   };
 
+  // Save article for later
+  const saveForLater = (item: NewsItem) => {
+    const newSavedItems = new Set(savedForLaterItems);
+    newSavedItems.add(item.id);
+    setSavedForLaterItems(newSavedItems);
+    saveToStorage(STORAGE_KEYS.SAVED_FOR_LATER, Array.from(newSavedItems));
+
+    toast({
+      title: "Saved for later!",
+      description: "Article saved to read later",
+    });
+  };
+
+  // Get read articles
+  const getReadArticles = () => {
+    return allArticles.filter(article => readItems.has(article.id));
+  };
+
+  // Get saved for later articles  
+  const getSavedForLaterArticles = () => {
+    return allArticles.filter(article => savedForLaterItems.has(article.id) && !readItems.has(article.id));
+  };
+
   return {
     articles,
     allArticles,
@@ -364,12 +394,15 @@ export const useNewsData = (initialTimeFilter: TimeFilter = 'day') => {
     swipeActions,
     timeFilter,
     unreadArticles: getUnreadArticles(),
+    readArticles: getReadArticles(),
+    savedForLaterArticles: getSavedForLaterArticles(),
     dailyStats: getDailyStats(),
     handleSwipe,
     handleBookmark,
     undoLastAction,
     shareArticle,
     markAsRead,
+    saveForLater,
     setCurrentIndex,
     changeTimeFilter,
     canUndo: swipeActions.length > 0 && currentIndex > 0
