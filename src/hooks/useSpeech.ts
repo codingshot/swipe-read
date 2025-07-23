@@ -1,11 +1,50 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
 export const useSpeech = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [selectedVoiceId, setSelectedVoiceId] = useState<string>('');
+  const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
   const currentUtterance = useRef<SpeechSynthesisUtterance | null>(null);
   const { toast } = useToast();
+
+  // Load available voices and selected voice from localStorage
+  useEffect(() => {
+    const loadVoices = () => {
+      const voices = window.speechSynthesis.getVoices();
+      setAvailableVoices(voices);
+      
+      // Load saved voice preference
+      const savedVoiceId = localStorage.getItem('selected_voice_id');
+      if (savedVoiceId && voices.find(v => v.voiceURI === savedVoiceId)) {
+        setSelectedVoiceId(savedVoiceId);
+      } else if (voices.length > 0) {
+        // Set default voice if none saved or saved voice not available
+        const defaultVoice = voices.find(voice => 
+          voice.name.includes('Samantha') || 
+          voice.name.includes('Karen') ||    
+          voice.name.includes('Zira') ||     
+          voice.name.includes('Natural') || 
+          voice.name.includes('Neural') ||
+          voice.name.includes('Premium') ||
+          voice.name.includes('Enhanced') ||
+          (voice.lang.startsWith('en') && voice.localService)
+        ) || voices.find(voice => voice.lang.startsWith('en')) || voices[0];
+        
+        if (defaultVoice) {
+          setSelectedVoiceId(defaultVoice.voiceURI);
+        }
+      }
+    };
+
+    loadVoices();
+    
+    // Voices might not be loaded immediately
+    if (window.speechSynthesis.onvoiceschanged !== undefined) {
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+  }, []);
 
   const speak = useCallback((text: string) => {
     if (!('speechSynthesis' in window)) {
@@ -30,21 +69,25 @@ export const useSpeech = () => {
     utterance.pitch = 1;
     utterance.volume = 1;
 
-    // Try to use a more natural voice if available
+    // Try to use selected voice or find a preferred voice
     const voices = window.speechSynthesis.getVoices();
-    const preferredVoice = voices.find(voice => 
-      voice.name.includes('Samantha') || // macOS natural voice
-      voice.name.includes('Karen') ||    // Windows natural voice
-      voice.name.includes('Zira') ||     // Windows natural voice
-      voice.name.includes('Natural') || 
-      voice.name.includes('Neural') ||
-      voice.name.includes('Premium') ||
-      voice.name.includes('Enhanced') ||
-      (voice.lang.startsWith('en') && voice.localService)
-    ) || voices.find(voice => voice.lang.startsWith('en')) || voices[0];
+    let selectedVoice = voices.find(voice => voice.voiceURI === selectedVoiceId);
+    
+    if (!selectedVoice) {
+      selectedVoice = voices.find(voice => 
+        voice.name.includes('Samantha') || 
+        voice.name.includes('Karen') ||    
+        voice.name.includes('Zira') ||     
+        voice.name.includes('Natural') || 
+        voice.name.includes('Neural') ||
+        voice.name.includes('Premium') ||
+        voice.name.includes('Enhanced') ||
+        (voice.lang.startsWith('en') && voice.localService)
+      ) || voices.find(voice => voice.lang.startsWith('en')) || voices[0];
+    }
 
-    if (preferredVoice) {
-      utterance.voice = preferredVoice;
+    if (selectedVoice) {
+      utterance.voice = selectedVoice;
     }
 
     utterance.onstart = () => {
@@ -78,7 +121,7 @@ export const useSpeech = () => {
     };
 
     window.speechSynthesis.speak(utterance);
-  }, [isSpeaking, toast]);
+  }, [isSpeaking, toast, selectedVoiceId]);
 
   const pause = useCallback(() => {
     if (isSpeaking && !isPaused) {
@@ -111,13 +154,26 @@ export const useSpeech = () => {
     }
   }, [isSpeaking, isPaused, pause, resume]);
 
+  const changeVoice = (voiceId: string) => {
+    setSelectedVoiceId(voiceId);
+    localStorage.setItem('selected_voice_id', voiceId);
+  };
+
+  const getSelectedVoice = () => {
+    return availableVoices.find(voice => voice.voiceURI === selectedVoiceId);
+  };
+
   return {
     isSpeaking,
     isPaused,
+    availableVoices,
+    selectedVoiceId,
+    selectedVoice: getSelectedVoice(),
     speak,
     pause,
     resume,
     stop,
-    toggle
+    toggle,
+    changeVoice
   };
 };

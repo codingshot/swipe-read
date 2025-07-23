@@ -1,60 +1,41 @@
-import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { FeedSelector, Feed } from './FeedSelector';
-import { TimeFilter } from '@/hooks/useNewsData';
+import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Clock, Calendar, Filter, Zap, Globe, Target, Bell } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Volume2, Clock, Target, Zap, BookOpen, Mic } from 'lucide-react';
 
 interface SettingsPopupProps {
   isOpen: boolean;
   onClose: () => void;
-  feeds: Feed[];
-  currentFeed: string;
-  onFeedChange: (feedId: string) => void;
-  timeFilter: TimeFilter;
-  onTimeFilterChange: (filter: TimeFilter) => void;
+  autoPlay: boolean;
+  autoRead: boolean;
+  onAutoPlayChange: (enabled: boolean) => void;
+  onAutoReadChange: (enabled: boolean) => void;
   dailyGoal: number;
   onDailyGoalChange: (goal: number) => void;
+  availableVoices: SpeechSynthesisVoice[];
+  selectedVoiceId: string;
+  onVoiceChange: (voiceId: string) => void;
 }
 
-export const SettingsPopup = ({
-  isOpen,
-  onClose,
-  feeds,
-  currentFeed,
-  onFeedChange,
-  timeFilter,
-  onTimeFilterChange,
-  dailyGoal,
-  onDailyGoalChange
+export const SettingsPopup = ({ 
+  isOpen, 
+  onClose, 
+  autoPlay, 
+  autoRead, 
+  onAutoPlayChange, 
+  onAutoReadChange, 
+  dailyGoal, 
+  onDailyGoalChange,
+  availableVoices,
+  selectedVoiceId,
+  onVoiceChange
 }: SettingsPopupProps) => {
-  const getFilterIcon = (filter: TimeFilter) => {
-    switch (filter) {
-      case 'day': return <Clock className="w-4 h-4" />;
-      case 'week': return <Calendar className="w-4 h-4" />;
-      case 'month': return <Calendar className="w-4 h-4" />;
-      case 'before': return <Filter className="w-4 h-4" />;
-      case 'demo': return <Zap className="w-4 h-4" />;
-      default: return <Filter className="w-4 h-4" />;
-    }
-  };
-
-  const getFilterLabel = (filter: TimeFilter) => {
-    switch (filter) {
-      case 'day': return 'Today';
-      case 'week': return 'This Week';
-      case 'month': return 'This Month';
-      case 'before': return 'Older Articles';
-      case 'all': return 'All Time';
-      case 'demo': return 'Demo Mode';
-      default: return filter;
-    }
-  };
-
-  const selectedFeed = feeds.find(feed => feed.id === currentFeed);
+  const selectedVoice = availableVoices.find(voice => voice.voiceURI === selectedVoiceId);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -66,139 +47,115 @@ export const SettingsPopup = ({
         </DialogHeader>
         
         <div className="space-y-6">
-          {/* Feed Selection */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Globe className="w-4 h-4" />
-              <h3 className="font-headline text-sm font-bold uppercase tracking-wide">
-                News Feed
-              </h3>
+          <Card className="p-4">
+            <div className="flex items-center gap-3 mb-4">
+              <Zap className="w-5 h-5 text-primary" />
+              <div>
+                <Label className="text-base font-medium">Auto Mode</Label>
+                <p className="text-sm text-muted-foreground">Automated reading experience</p>
+              </div>
             </div>
-            <FeedSelector
-              feeds={feeds}
-              currentFeed={currentFeed}
-              onFeedChange={onFeedChange}
-              className="w-full"
-            />
-            {selectedFeed && (
-              <p className="text-xs text-muted-foreground">
-                {selectedFeed.description}
-              </p>
-            )}
-          </div>
-
-          <Separator />
-
-          {/* Time Filter */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
-              <h3 className="font-headline text-sm font-bold uppercase tracking-wide">
-                Time Filter
-              </h3>
-            </div>
-            <Select value={timeFilter} onValueChange={onTimeFilterChange}>
-              <SelectTrigger className="w-full border-2 border-border">
-                <div className="flex items-center gap-2">
-                  {getFilterIcon(timeFilter)}
-                  <span className="font-sans font-bold uppercase text-sm">
-                    {getFilterLabel(timeFilter)}
-                  </span>
+            
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <Label className="text-sm font-medium">Auto Play</Label>
+                  <p className="text-xs text-muted-foreground">Automatically advance to next article</p>
                 </div>
-              </SelectTrigger>
-              <SelectContent className="border-2 border-border bg-background z-50">
-                <SelectItem value="day" className="font-sans">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4" />
-                    <div>
-                      <div className="font-bold">TODAY</div>
-                      <div className="text-xs text-muted-foreground">Last 24 hours</div>
-                    </div>
-                  </div>
-                </SelectItem>
-                <SelectItem value="week" className="font-sans">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4" />
-                    <div>
-                      <div className="font-bold">THIS WEEK</div>
-                      <div className="text-xs text-muted-foreground">Last 7 days</div>
-                    </div>
-                  </div>
-                </SelectItem>
-                <SelectItem value="month" className="font-sans">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4" />
-                    <div>
-                      <div className="font-bold">THIS MONTH</div>
-                      <div className="text-xs text-muted-foreground">Last 30 days</div>
-                    </div>
-                  </div>
-                </SelectItem>
-                <SelectItem value="before" className="font-sans">
-                  <div className="flex items-center gap-2">
-                    <Filter className="w-4 h-4" />
-                    <div>
-                      <div className="font-bold">OLDER</div>
-                      <div className="text-xs text-muted-foreground">Before 30 days</div>
-                    </div>
-                  </div>
-                </SelectItem>
-                <SelectItem value="all" className="font-sans">
-                  <div className="flex items-center gap-2">
-                    <Filter className="w-4 h-4" />
-                    <div>
-                      <div className="font-bold">ALL TIME</div>
-                      <div className="text-xs text-muted-foreground">Every article</div>
-                    </div>
-                  </div>
-                </SelectItem>
-                <SelectItem value="demo" className="font-sans">
-                  <div className="flex items-center gap-2">
-                    <Zap className="w-4 h-4" />
-                    <div>
-                      <div className="font-bold">DEMO MODE</div>
-                      <div className="text-xs text-muted-foreground">Explore past articles</div>
-                    </div>
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <Separator />
-
-          {/* Daily Goal */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Target className="w-4 h-4" />
-              <h3 className="font-headline text-sm font-bold uppercase tracking-wide">
-                Daily Goal
-              </h3>
+                <Switch 
+                  checked={autoPlay} 
+                  onCheckedChange={onAutoPlayChange}
+                />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <Label className="text-sm font-medium">Auto Read</Label>
+                  <p className="text-xs text-muted-foreground">Read articles aloud with text-to-speech</p>
+                </div>
+                <Switch 
+                  checked={autoRead} 
+                  onCheckedChange={onAutoReadChange}
+                />
+              </div>
             </div>
-            <Select value={dailyGoal.toString()} onValueChange={(value) => onDailyGoalChange(parseInt(value))}>
-              <SelectTrigger className="w-full border-2 border-border">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="border-2 border-border bg-background z-50">
-                {[5, 10, 15, 20, 25, 30, 50].map((goal) => (
-                  <SelectItem key={goal} value={goal.toString()} className="font-sans">
-                    <div className="flex items-center gap-2">
-                      <Target className="w-4 h-4" />
-                      <span className="font-bold">{goal} ARTICLES</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground">
-              Set your daily reading goal
-            </p>
-          </div>
+          </Card>
+
+          <Card className="p-4">
+            <div className="flex items-center gap-3 mb-4">
+              <Target className="w-5 h-5 text-primary" />
+              <div>
+                <Label className="text-base font-medium">Daily Goal</Label>
+                <p className="text-sm text-muted-foreground">Set your reading target</p>
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              <Select value={dailyGoal.toString()} onValueChange={(value) => onDailyGoalChange(parseInt(value))}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[5, 10, 15, 20, 25, 30, 50].map((goal) => (
+                    <SelectItem key={goal} value={goal.toString()}>
+                      {goal} articles per day
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </Card>
+
+          <Card className="p-4">
+            <div className="flex items-center gap-3 mb-4">
+              <Mic className="w-5 h-5 text-primary" />
+              <div>
+                <Label className="text-base font-medium">Voice Settings</Label>
+                <p className="text-sm text-muted-foreground">Choose voice for audio reading</p>
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Voice Selection</Label>
+                <Select value={selectedVoiceId} onValueChange={onVoiceChange}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a voice">
+                      {selectedVoice ? (
+                        <div className="flex items-center gap-2">
+                          <span>{selectedVoice.name}</span>
+                          {selectedVoice.localService && (
+                            <Badge variant="secondary" className="text-xs">Local</Badge>
+                          )}
+                        </div>
+                      ) : (
+                        "Select a voice"
+                      )}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent className="max-h-48 overflow-y-auto">
+                    {availableVoices
+                      .filter(voice => voice.lang.startsWith('en'))
+                      .map((voice) => (
+                        <SelectItem key={voice.voiceURI} value={voice.voiceURI}>
+                          <div className="flex items-center gap-2">
+                            <span>{voice.name}</span>
+                            {voice.localService && (
+                              <Badge variant="secondary" className="text-xs">Local</Badge>
+                            )}
+                          </div>
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </Card>
         </div>
 
         <div className="flex justify-end pt-4">
-          <Button variant="newspaper" onClick={onClose}>
-            Close Settings
+          <Button variant="outline" onClick={onClose}>
+            Close
           </Button>
         </div>
       </DialogContent>

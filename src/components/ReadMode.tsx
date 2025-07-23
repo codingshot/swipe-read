@@ -55,7 +55,7 @@ export const ReadMode = () => {
     updateSwipeAction
   } = useNewsData('day', getSelectedFeedUrls(), selectedFeeds[0] || 'multi', getSelectedFeedUrls().length > 1 ? 'Multi-Feed' : feeds.find(f => f.id === selectedFeeds[0])?.name);
 
-  const { speak, stop, isSpeaking } = useSpeech();
+  const { speak, stop, isSpeaking, availableVoices, selectedVoiceId, changeVoice } = useSpeech();
   const [isAutoPlay, setIsAutoPlay] = useState(false);
   const [autoPlayInterval, setAutoPlayInterval] = useState<NodeJS.Timeout | null>(null);
   const [showSettings, setShowSettings] = useState(false);
@@ -571,13 +571,15 @@ export const ReadMode = () => {
       <SettingsPopup
         isOpen={showSettings}
         onClose={() => setShowSettings(false)}
-        feeds={feeds}
-        currentFeed={selectedFeeds[0] || ''}
-        onFeedChange={(feedId) => changeFeeds([feedId])}
-        timeFilter={timeFilter}
-        onTimeFilterChange={changeTimeFilter}
+        autoPlay={isAutoPlay}
+        autoRead={autoRead}
+        onAutoPlayChange={setIsAutoPlay}
+        onAutoReadChange={setAutoRead}
         dailyGoal={dailyGoal}
         onDailyGoalChange={changeDailyGoal}
+        availableVoices={availableVoices}
+        selectedVoiceId={selectedVoiceId}
+        onVoiceChange={changeVoice}
       />
     </div>
   );
