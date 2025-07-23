@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -29,24 +29,44 @@ const truncateMiddle = (text: string, maxLength: number = 20) => {
 
 export const MultiFeedSelector = ({ feeds, selectedFeeds, onFeedChange, className }: MultiFeedSelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [pendingFeeds, setPendingFeeds] = useState<string[]>(selectedFeeds);
+  
+  // Update pending feeds when selectedFeeds prop changes
+  useEffect(() => {
+    setPendingFeeds(selectedFeeds);
+  }, [selectedFeeds]);
   
   const selectedFeedsData = feeds.filter(feed => selectedFeeds.includes(feed.id));
-  const allSelected = selectedFeeds.length === feeds.length;
-  const noneSelected = selectedFeeds.length === 0;
+  const pendingFeedsData = feeds.filter(feed => pendingFeeds.includes(feed.id));
+  const allSelected = pendingFeeds.length === feeds.length;
+  const noneSelected = pendingFeeds.length === 0;
+  const hasChanges = JSON.stringify(pendingFeeds.sort()) !== JSON.stringify(selectedFeeds.sort());
 
   const handleFeedToggle = (feedId: string) => {
-    const newSelected = selectedFeeds.includes(feedId)
-      ? selectedFeeds.filter(id => id !== feedId)
-      : [...selectedFeeds, feedId];
-    onFeedChange(newSelected);
+    const newPending = pendingFeeds.includes(feedId)
+      ? pendingFeeds.filter(id => id !== feedId)
+      : [...pendingFeeds, feedId];
+    setPendingFeeds(newPending);
   };
 
   const handleSelectAll = () => {
-    onFeedChange(allSelected ? [] : feeds.map(f => f.id));
+    setPendingFeeds(allSelected ? [] : feeds.map(f => f.id));
+  };
+
+  const handleLoadFeeds = () => {
+    if (pendingFeeds.length > 0) {
+      onFeedChange(pendingFeeds);
+      setIsOpen(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setPendingFeeds(selectedFeeds);
+    setIsOpen(false);
   };
 
   const getDisplayText = () => {
-    if (noneSelected) return 'Select Feeds';
+    if (selectedFeeds.length === 0) return 'Select Feeds';
     if (selectedFeeds.length === 1) {
       return truncateMiddle(selectedFeedsData[0].name, 16);
     }
@@ -92,7 +112,7 @@ export const MultiFeedSelector = ({ feeds, selectedFeeds, onFeedChange, classNam
         
         <div className="max-h-64 overflow-y-auto">
           {feeds.map((feed) => {
-            const isSelected = selectedFeeds.includes(feed.id);
+            const isSelected = pendingFeeds.includes(feed.id);
             return (
               <div
                 key={feed.id}
@@ -117,10 +137,38 @@ export const MultiFeedSelector = ({ feeds, selectedFeeds, onFeedChange, classNam
           })}
         </div>
 
+        {/* Action buttons */}
+        <div className="p-3 border-t border-border bg-accent/10">
+          <div className="flex gap-2">
+            <Button
+              onClick={handleLoadFeeds}
+              disabled={pendingFeeds.length === 0}
+              className="flex-1 h-8 text-xs font-bold uppercase"
+              variant={hasChanges ? "default" : "outline"}
+            >
+              Load Feeds ({pendingFeeds.length})
+            </Button>
+            <Button
+              onClick={handleCancel}
+              variant="outline"
+              className="h-8 px-3 text-xs font-bold uppercase"
+            >
+              Cancel
+            </Button>
+          </div>
+          
+          {hasChanges && (
+            <div className="text-xs text-muted-foreground mt-2 text-center">
+              Click "Load Feeds" to apply changes
+            </div>
+          )}
+        </div>
+
+        {/* Currently active feeds */}
         {selectedFeedsData.length > 0 && (
           <div className="p-3 border-t border-border bg-accent/20">
             <div className="text-xs font-sans font-bold uppercase mb-2">
-              Active Feeds ({selectedFeeds.length})
+              Currently Loaded ({selectedFeeds.length})
             </div>
             <div className="flex flex-wrap gap-1">
               {selectedFeedsData.map((feed) => (
@@ -129,14 +177,7 @@ export const MultiFeedSelector = ({ feeds, selectedFeeds, onFeedChange, classNam
                   variant="outline"
                   className="text-xs border-border bg-background"
                 >
-                  <span className="mr-1">{truncateMiddle(feed.name, 12)}</span>
-                  <X
-                    className="w-3 h-3 cursor-pointer hover:text-destructive"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleFeedToggle(feed.id);
-                    }}
-                  />
+                  {truncateMiddle(feed.name, 12)}
                 </Badge>
               ))}
             </div>
