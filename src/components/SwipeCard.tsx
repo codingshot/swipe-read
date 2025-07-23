@@ -103,6 +103,26 @@ export const SwipeCard = ({
   const isTwitterSource = item.source.title.toLowerCase() === 'twitter' || item.link.includes('x.com') || item.link.includes('twitter.com');
   const handleMouseDown = (e: React.MouseEvent) => {
     if (isFlipped) return;
+    
+    // Don't start dragging if clicking on interactive elements
+    const target = e.target as HTMLElement;
+    if (
+      target.closest('button') ||
+      target.closest('a') ||
+      target.closest('[role="button"]') ||
+      target.closest('.pointer-events-auto') ||
+      target.hasAttribute('onclick') ||
+      target.tagName === 'BUTTON' ||
+      target.tagName === 'A' ||
+      target.classList.contains('cursor-pointer') ||
+      target.closest('.feed-tag') ||
+      target.closest('.author-link') ||
+      target.closest('.twitter-link') ||
+      target.closest('.audio-button')
+    ) {
+      return;
+    }
+    
     setIsDragging(true);
     startPos.current = {
       x: e.clientX,
@@ -111,6 +131,26 @@ export const SwipeCard = ({
   };
   const handleTouchStart = (e: React.TouchEvent) => {
     if (isFlipped) return;
+    
+    // Don't start dragging if touching interactive elements
+    const target = e.target as HTMLElement;
+    if (
+      target.closest('button') ||
+      target.closest('a') ||
+      target.closest('[role="button"]') ||
+      target.closest('.pointer-events-auto') ||
+      target.hasAttribute('onclick') ||
+      target.tagName === 'BUTTON' ||
+      target.tagName === 'A' ||
+      target.classList.contains('cursor-pointer') ||
+      target.closest('.feed-tag') ||
+      target.closest('.author-link') ||
+      target.closest('.twitter-link') ||
+      target.closest('.audio-button')
+    ) {
+      return;
+    }
+    
     setIsDragging(true);
     const touch = e.touches[0];
     startPos.current = {
