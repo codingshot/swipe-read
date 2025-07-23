@@ -25,13 +25,33 @@ export const SubmitNewsPopup = ({ children }: SubmitNewsPopupProps) => {
     try {
       const url = new URL(urlString);
       const hostname = url.hostname.toLowerCase();
-      return hostname === 'x.com' || 
-             hostname === 'www.x.com' || 
-             hostname === 'twitter.com' || 
-             hostname === 'www.twitter.com';
+      const isValidDomain = hostname === 'x.com' || 
+                           hostname === 'www.x.com' || 
+                           hostname === 'twitter.com' || 
+                           hostname === 'www.twitter.com';
+      
+      // Check if it's a status URL with a tweet ID
+      const pathParts = url.pathname.split('/');
+      const hasStatus = pathParts.includes('status') && pathParts[pathParts.indexOf('status') + 1];
+      
+      return isValidDomain && hasStatus;
     } catch {
       return false;
     }
+  };
+
+  const extractTweetId = (urlString: string) => {
+    try {
+      const url = new URL(urlString);
+      const pathParts = url.pathname.split('/');
+      const statusIndex = pathParts.indexOf('status');
+      if (statusIndex !== -1 && pathParts[statusIndex + 1]) {
+        return pathParts[statusIndex + 1].split('?')[0]; // Remove query params
+      }
+    } catch {
+      return null;
+    }
+    return null;
   };
 
   const handleSubmit = () => {
@@ -130,11 +150,75 @@ export const SubmitNewsPopup = ({ children }: SubmitNewsPopupProps) => {
               placeholder="https://x.com/username/status/..."
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              className="border-2 border-border"
+              className={`border-2 ${validateUrl(url) && url ? 'border-green-500' : 'border-border'}`}
             />
             <p className="text-xs text-muted-foreground">
               Enter a valid X.com or Twitter.com URL to reply to
             </p>
+            
+            {/* Tweet Preview */}
+            {url && validateUrl(url) && (
+              <div className="mt-3 p-3 border-2 border-border rounded-md bg-muted/50">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-xs font-sans font-bold uppercase tracking-wide text-green-700">
+                    Valid Tweet URL
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  <a 
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-primary hover:text-primary/80 transition-colors underline break-all"
+                  >
+                    {url}
+                  </a>
+                  <div className="text-xs text-muted-foreground">
+                    Tweet ID: {extractTweetId(url)}
+                  </div>
+                </div>
+                
+                {/* Simple Tweet Embed Placeholder */}
+                <div className="mt-3 p-3 border border-border/50 rounded bg-background/50">
+                  <div className="flex items-start gap-2">
+                    <div className="w-8 h-8 bg-muted rounded-full flex-shrink-0"></div>
+                    <div className="flex-1 space-y-1">
+                      <div className="flex items-center gap-1">
+                        <div className="h-3 bg-muted rounded w-16"></div>
+                        <div className="h-3 bg-muted/60 rounded w-12"></div>
+                      </div>
+                      <div className="space-y-1">
+                        <div className="h-3 bg-muted/80 rounded w-full"></div>
+                        <div className="h-3 bg-muted/80 rounded w-3/4"></div>
+                      </div>
+                      <div className="flex gap-4 mt-2">
+                        <div className="h-2 bg-muted/60 rounded w-8"></div>
+                        <div className="h-2 bg-muted/60 rounded w-8"></div>
+                        <div className="h-2 bg-muted/60 rounded w-8"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-2 text-center">
+                    Tweet Preview (ID: {extractTweetId(url)})
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {url && !validateUrl(url) && (
+              <div className="mt-2 p-2 border-2 border-red-500 rounded-md bg-red-50 dark:bg-red-950/20">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                  <span className="text-xs font-sans font-bold uppercase tracking-wide text-red-700 dark:text-red-400">
+                    Invalid URL
+                  </span>
+                </div>
+                <p className="text-xs text-red-600 dark:text-red-400 mt-1">
+                  Please enter a valid tweet URL (must include /status/)
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">
