@@ -36,17 +36,17 @@ export interface SwipeAction {
 
 export type TimeFilter = 'day' | 'week' | 'month' | 'before' | 'all' | 'demo';
 
-const RSS_API_URL = 'https://grants-rss.up.railway.app/api/items';
 const STORAGE_KEYS = {
   READ_ITEMS: 'read_mode_read_items',
   SWIPE_ACTIONS: 'read_mode_swipe_actions',
   DAILY_STATS: 'read_mode_daily_stats',
   FILTERS: 'read_mode_filters',
   TIME_FILTER: 'read_mode_time_filter',
-  SAVED_FOR_LATER: 'read_mode_saved_for_later'
+  SAVED_FOR_LATER: 'read_mode_saved_for_later',
+  DAILY_GOAL: 'read_mode_daily_goal'
 };
 
-export const useNewsData = (initialTimeFilter: TimeFilter = 'day') => {
+export const useNewsData = (initialTimeFilter: TimeFilter = 'day', feedUrl?: string) => {
   const [articles, setArticles] = useState<NewsItem[]>([]);
   const [allArticles, setAllArticles] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,6 +56,7 @@ export const useNewsData = (initialTimeFilter: TimeFilter = 'day') => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [timeFilter, setTimeFilter] = useState<TimeFilter>(initialTimeFilter);
   const [savedForLaterItems, setSavedForLaterItems] = useState<Set<string>>(new Set());
+  const [dailyGoal, setDailyGoal] = useState(20);
   const { toast } = useToast();
 
   // Load data from localStorage
@@ -64,6 +65,7 @@ export const useNewsData = (initialTimeFilter: TimeFilter = 'day') => {
     const savedSwipeActions = localStorage.getItem(STORAGE_KEYS.SWIPE_ACTIONS);
     const savedTimeFilter = localStorage.getItem(STORAGE_KEYS.TIME_FILTER);
     const savedForLaterItems = localStorage.getItem(STORAGE_KEYS.SAVED_FOR_LATER);
+    const savedDailyGoal = localStorage.getItem(STORAGE_KEYS.DAILY_GOAL);
 
     if (savedReadItems) {
       setReadItems(new Set(JSON.parse(savedReadItems)));
@@ -79,6 +81,10 @@ export const useNewsData = (initialTimeFilter: TimeFilter = 'day') => {
 
     if (savedForLaterItems) {
       setSavedForLaterItems(new Set(JSON.parse(savedForLaterItems)));
+    }
+
+    if (savedDailyGoal) {
+      setDailyGoal(parseInt(savedDailyGoal));
     }
   }, []);
 
@@ -120,11 +126,13 @@ export const useNewsData = (initialTimeFilter: TimeFilter = 'day') => {
   // Fetch articles from RSS API
   useEffect(() => {
     const fetchArticles = async () => {
+      if (!feedUrl) return; // Don't fetch if no feed URL provided
+      
       try {
         setLoading(true);
         setError(null);
 
-        const response = await fetch(RSS_API_URL);
+        const response = await fetch(feedUrl);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -184,7 +192,7 @@ export const useNewsData = (initialTimeFilter: TimeFilter = 'day') => {
     };
 
     fetchArticles();
-  }, [toast, timeFilter]);
+  }, [toast, timeFilter, feedUrl]);
 
   // Change time filter
   const changeTimeFilter = (newFilter: TimeFilter) => {
@@ -322,7 +330,7 @@ export const useNewsData = (initialTimeFilter: TimeFilter = 'day') => {
       todayRead: todayActions.length,
       todayLiked: todayActions.filter(a => a.action === 'like').length,
       todayBookmarked: todayActions.filter(a => a.action === 'bookmark').length,
-      dailyGoal: 20 // This could be configurable
+      dailyGoal
     };
   };
 
@@ -384,6 +392,12 @@ export const useNewsData = (initialTimeFilter: TimeFilter = 'day') => {
     return allArticles.filter(article => savedForLaterItems.has(article.id) && !readItems.has(article.id));
   };
 
+  // Change daily goal
+  const changeDailyGoal = (newGoal: number) => {
+    setDailyGoal(newGoal);
+    localStorage.setItem(STORAGE_KEYS.DAILY_GOAL, newGoal.toString());
+  };
+
   return {
     articles,
     allArticles,
@@ -393,6 +407,7 @@ export const useNewsData = (initialTimeFilter: TimeFilter = 'day') => {
     readItems,
     swipeActions,
     timeFilter,
+    dailyGoal,
     unreadArticles: getUnreadArticles(),
     readArticles: getReadArticles(),
     savedForLaterArticles: getSavedForLaterArticles(),
@@ -405,6 +420,7 @@ export const useNewsData = (initialTimeFilter: TimeFilter = 'day') => {
     saveForLater,
     setCurrentIndex,
     changeTimeFilter,
+    changeDailyGoal,
     canUndo: swipeActions.length > 0 && currentIndex > 0,
     updateSwipeAction: (itemId: string, newAction: 'like' | 'dismiss' | 'bookmark') => {
       const existingActionIndex = swipeActions.findIndex(action => action.itemId === itemId);

@@ -1,0 +1,58 @@
+{
+  "feeds": [
+    {
+      "id": "crypto-grants",
+      "name": "Crypto Grants",
+      "description": "All crypto grants by Crypto Grant Wire",
+      "rssUrl": "https://grants-rss.up.railway.app/api/items"
+    },
+    {
+      "id": "stablecoins",
+      "name": "Stablecoins",
+      "description": "Stablecoin ecosystem news and updates",
+      "rssUrl": "https://stablecoins-rss.up.railway.app/api/items"
+    },
+    {
+      "id": "us-crypto",
+      "name": "US Crypto",
+      "description": "American crypto feed by American Crypto Foundation",
+      "rssUrl": "https://usa-rss.up.railway.app/api/items"
+    },
+    {
+      "id": "eigen-layer",
+      "name": "Eigen Layer",
+      "description": "All Eigen Layer ecosystem news",
+      "rssUrl": "https://eigen-rss.up.railway.app/api/items"
+    },
+    {
+      "id": "solana",
+      "name": "Solana",
+      "description": "Solana ecosystem news",
+      "rssUrl": "https://solana-rss.up.railway.app/api/items"
+    },
+    {
+      "id": "near",
+      "name": "NEAR",
+      "description": "NEAR ecosystem news",
+      "rssUrl": "https://near-rss.up.railway.app/api/items"
+    },
+    {
+      "id": "chain-abstraction",
+      "name": "Chain Abstraction",
+      "description": "Everything Chain Abstraction",
+      "rssUrl": "https://abstraction-rss.up.railway.app/api/items"
+    },
+    {
+      "id": "ethereum",
+      "name": "Ethereum",
+      "description": "Everything Ethereum",
+      "rssUrl": "https://ethereum-rss.up.railway.app/api/items"
+    },
+    {
+      "id": "sui",
+      "name": "Sui",
+      "description": "All news for Sui ecosystem",
+      "rssUrl": "https://sui-rss.up.railway.app/api/items"
+    }
+  ]
+}

@@ -6,7 +6,9 @@ import { VerticalProgress } from './VerticalProgress';
 import { ComingSoonFeatures } from './ComingSoonFeatures';
 import { NavigationFeatures } from './NavigationFeatures';
 import { PlayModeTimer } from './PlayModeTimer';
+import { SettingsPopup } from './SettingsPopup';
 import { useNewsData } from '@/hooks/useNewsData';
+import { useFeedData } from '@/hooks/useFeedData';
 import { useSpeech } from '@/hooks/useSpeech';
 import { calculateReadingTime } from '@/hooks/useTypingAnimation';
 import { Card } from '@/components/ui/card';
@@ -17,6 +19,15 @@ import { RefreshCw, Coffee, Zap, Archive, Calendar, Clock, Filter } from 'lucide
 import { cn } from '@/lib/utils';
 
 export const ReadMode = () => {
+  // Feed management
+  const {
+    feeds,
+    currentFeed,
+    changeFeed,
+    getCurrentFeedUrl,
+    loading: feedsLoading
+  } = useFeedData();
+
   const {
     articles,
     loading,
@@ -25,6 +36,7 @@ export const ReadMode = () => {
     unreadArticles,
     dailyStats,
     timeFilter,
+    dailyGoal,
     readArticles,
     savedForLaterArticles,
     swipeActions,
@@ -35,13 +47,15 @@ export const ReadMode = () => {
     shareArticle,
     setCurrentIndex,
     changeTimeFilter,
+    changeDailyGoal,
     canUndo,
     updateSwipeAction
-  } = useNewsData();
+  } = useNewsData('day', getCurrentFeedUrl());
 
   const { speak } = useSpeech();
   const [isAutoPlay, setIsAutoPlay] = useState(false);
   const [autoPlayInterval, setAutoPlayInterval] = useState<NodeJS.Timeout | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
 
   const currentArticle = unreadArticles[currentIndex];
   const isAllCaughtUp = !currentArticle || currentIndex >= unreadArticles.length;
@@ -202,9 +216,12 @@ export const ReadMode = () => {
           dailyGoal={dailyStats.dailyGoal}
           isAutoPlay={false}
           timeFilter={timeFilter}
+          feeds={feeds}
+          currentFeed={currentFeed}
           onToggleAutoPlay={() => {}}
           onTimeFilterChange={changeTimeFilter}
-          onOpenSettings={() => {}}
+          onFeedChange={changeFeed}
+          onOpenSettings={() => setShowSettings(true)}
         />
         
         <div className="flex items-center justify-center min-h-[calc(100vh-140px)] p-3 sm:p-4">
@@ -327,9 +344,12 @@ export const ReadMode = () => {
         dailyGoal={dailyStats.dailyGoal}
         isAutoPlay={isAutoPlay}
         timeFilter={timeFilter}
+        feeds={feeds}
+        currentFeed={currentFeed}
         onToggleAutoPlay={handleToggleAutoPlay}
         onTimeFilterChange={changeTimeFilter}
-        onOpenSettings={() => {}}
+        onFeedChange={changeFeed}
+        onOpenSettings={() => setShowSettings(true)}
       />
       
       {/* Vertical Progress on Left */}
@@ -396,6 +416,19 @@ export const ReadMode = () => {
         onBookmark={handleBookmarkAction}
         canUndo={canUndo}
         className="fixed bottom-6 sm:bottom-8 left-0 right-0 z-50 pointer-events-auto"
+      />
+
+      {/* Settings Popup */}
+      <SettingsPopup
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+        feeds={feeds}
+        currentFeed={currentFeed}
+        onFeedChange={changeFeed}
+        timeFilter={timeFilter}
+        onTimeFilterChange={changeTimeFilter}
+        dailyGoal={dailyGoal}
+        onDailyGoalChange={changeDailyGoal}
       />
     </div>
   );
