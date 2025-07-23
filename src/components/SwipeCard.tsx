@@ -235,22 +235,25 @@ export const SwipeCard = ({
             "absolute inset-0 p-4 sm:p-6 flex flex-col",
             isFlipped ? "opacity-0" : "opacity-100"
           )}>
-            {/* Header with newspaper dateline style */}
+            {/* Header with source only */}
             <div className="flex items-center justify-between mb-3 sm:mb-4 pb-2 border-b border-border">
-              <div className="flex items-center gap-1 sm:gap-2 text-muted-foreground text-xs sm:text-sm font-sans uppercase tracking-wide">
-                <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
-                {formatTimeAgo(item.date)}
-              </div>
+              <div className="w-full" />
               <Badge variant="outline" className="text-xs font-sans font-bold uppercase border-2 border-border">
                 {item.source.title}
               </Badge>
             </div>
 
             {/* Headline with typing animation */}
-            <h2 className="font-headline text-lg sm:text-2xl font-bold text-foreground leading-tight mb-3 sm:mb-4 line-clamp-4 sm:line-clamp-3 headline-hover p-2 -m-2 transition-colors duration-150 min-h-[3rem] sm:min-h-[4rem]">
+            <h2 className="font-headline text-lg sm:text-2xl font-bold text-foreground leading-tight mb-2 sm:mb-3 line-clamp-4 sm:line-clamp-3 headline-hover p-2 -m-2 transition-colors duration-150 min-h-[3rem] sm:min-h-[4rem]">
               {titleAnimation.displayedText}
               {!titleAnimation.isComplete && <span className="animate-pulse">|</span>}
             </h2>
+
+            {/* Time ago under headline */}
+            <div className="flex items-center gap-1 sm:gap-2 text-muted-foreground text-xs sm:text-sm font-sans uppercase tracking-wide mb-3 sm:mb-4">
+              <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
+              {formatTimeAgo(item.date)}
+            </div>
 
             {/* Lead paragraph with typing animation */}
             <p className="font-body text-muted-foreground text-sm sm:text-base leading-relaxed mb-4 sm:mb-6 flex-1 line-clamp-6 sm:line-clamp-6 min-h-[6rem]">
@@ -259,27 +262,34 @@ export const SwipeCard = ({
             </p>
 
 
-            {/* Byline and Twitter */}
-            {(item.author.length > 0 || isTwitterSource) && (
-              <div className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4 font-sans uppercase tracking-wide border-t border-border pt-2 flex items-center justify-between">
-                {item.author.length > 0 && (
-                  <span>BY {item.author.map(a => a.name).join(', ')}</span>
-                )}
-                {isTwitterSource && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      window.open(item.link, '_blank');
-                    }}
-                    className="ml-auto px-2 py-1 h-auto text-xs font-sans border-border hover:bg-accent/20"
-                  >
-                    <Twitter className="w-3 h-3 mr-1" />
-                    TWITTER
-                  </Button>
-                )}
+            {/* Byline */}
+            {item.author.length > 0 && (
+              <div className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4 font-sans uppercase tracking-wide border-t border-border pt-2">
+                <span>BY </span>
+                {item.author.map((author, index) => (
+                  <span key={index}>
+                    {isTwitterSource ? (
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          // Try to extract Twitter handle from author name or create search URL
+                          const twitterHandle = author.name.replace('@', '');
+                          const twitterUrl = author.name.startsWith('@') 
+                            ? `https://twitter.com/${twitterHandle}`
+                            : `https://twitter.com/search?q=${encodeURIComponent(author.name)}`;
+                          window.open(twitterUrl, '_blank');
+                        }}
+                        className="hover:text-foreground transition-colors underline cursor-pointer"
+                      >
+                        {author.name}
+                      </button>
+                    ) : (
+                      <span>{author.name}</span>
+                    )}
+                    {index < item.author.length - 1 && ', '}
+                  </span>
+                ))}
               </div>
             )}
 
@@ -422,15 +432,33 @@ export const SwipeCard = ({
               </div>
               
               <div className="space-y-4">
-                {/* Submitter info */}
+                {/* Author/Tweet info */}
                 {item.author.length > 0 && (
                   <div className="bg-accent/10 p-3 rounded border border-border">
-                    <h4 className="font-headline text-sm font-bold uppercase tracking-wide mb-2">SUBMITTED BY</h4>
-                    <div className="space-y-1">
+                    <h4 className="font-headline text-sm font-bold uppercase tracking-wide mb-2">
+                      {isTwitterSource ? 'TWEETED BY' : 'SUBMITTED BY'}
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
                       {item.author.map((author, index) => (
                         <div key={index} className="text-sm">
-                          <span className="font-medium">{author.name}</span>
-                          {author.link && (
+                          {isTwitterSource ? (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const twitterHandle = author.name.replace('@', '');
+                                const twitterUrl = author.name.startsWith('@') 
+                                  ? `https://twitter.com/${twitterHandle}`
+                                  : `https://twitter.com/search?q=${encodeURIComponent(author.name)}`;
+                                window.open(twitterUrl, '_blank');
+                              }}
+                              className="font-medium hover:text-primary transition-colors underline cursor-pointer"
+                            >
+                              {author.name}
+                            </button>
+                          ) : (
+                            <span className="font-medium">{author.name}</span>
+                          )}
+                          {author.link && !isTwitterSource && (
                             <Button
                               variant="link"
                               size="sm"
