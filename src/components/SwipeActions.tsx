@@ -21,53 +21,53 @@ export const SwipeActions = ({
 }: SwipeActionsProps) => {
   return (
     <div className={cn(
-      "flex items-center justify-center gap-4 py-6",
+      "flex items-center justify-center gap-3 sm:gap-4 py-4 sm:py-6 px-4",
       className
     )}>
       {/* Undo button */}
       <Button
-        variant="outline"
+        variant="newspaper"
         size="lg"
         onClick={onUndo}
         disabled={!canUndo}
         className={cn(
-          "h-12 w-12 rounded-full border-2 transition-all duration-200",
+          "h-10 w-10 sm:h-12 sm:w-12 transition-all duration-200 flex-shrink-0",
           canUndo 
-            ? "hover:scale-110 hover:shadow-glow" 
+            ? "hover:scale-110 hover:shadow-elevated active:animate-press" 
             : "opacity-50 cursor-not-allowed"
         )}
       >
-        <RotateCcw className="w-5 h-5" />
+        <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5" />
       </Button>
 
       {/* Dismiss button */}
       <Button
-        variant="outline"
+        variant="newspaper"
         size="lg"
         onClick={onDismiss}
-        className="h-16 w-16 rounded-full border-2 border-destructive/30 text-destructive hover:bg-gradient-dismiss hover:text-white hover:border-transparent hover:scale-110 transition-all duration-200 hover:shadow-glow"
+        className="h-12 w-12 sm:h-16 sm:w-16 border-destructive text-destructive hover:bg-destructive hover:text-white hover:scale-110 transition-all duration-200 hover:shadow-elevated active:animate-press flex-shrink-0"
       >
-        <X className="w-6 h-6" />
+        <X className="w-5 h-5 sm:w-6 sm:h-6" />
       </Button>
 
       {/* Bookmark button */}
       <Button
-        variant="outline"
+        variant="newspaper"
         size="lg"
         onClick={onBookmark}
-        className="h-12 w-12 rounded-full border-2 border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground hover:scale-110 transition-all duration-200 hover:shadow-glow"
+        className="h-10 w-10 sm:h-12 sm:w-12 border-primary text-primary hover:bg-primary hover:text-primary-foreground hover:scale-110 transition-all duration-200 hover:shadow-elevated active:animate-press flex-shrink-0"
       >
-        <Bookmark className="w-5 h-5" />
+        <Bookmark className="w-4 h-4 sm:w-5 sm:h-5" />
       </Button>
 
       {/* Like button */}
       <Button
-        variant="outline"
+        variant="newspaper"
         size="lg"
         onClick={onLike}
-        className="h-16 w-16 rounded-full border-2 border-success/30 text-success hover:bg-gradient-like hover:text-white hover:border-transparent hover:scale-110 transition-all duration-200 hover:shadow-glow"
+        className="h-12 w-12 sm:h-16 sm:w-16 border-success text-success hover:bg-success hover:text-white hover:scale-110 transition-all duration-200 hover:shadow-elevated active:animate-press flex-shrink-0"
       >
-        <Heart className="w-6 h-6" />
+        <Heart className="w-5 h-5 sm:w-6 sm:h-6" />
       </Button>
     </div>
   );

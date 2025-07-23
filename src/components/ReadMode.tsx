@@ -198,18 +198,18 @@ export const ReadMode = () => {
         onOpenSettings={() => {}}
       />
       
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)] p-4 relative">
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)] p-2 sm:p-4 relative">
         {/* Demo mode indicator */}
         {timeFilter === 'demo' && (
-          <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-40">
-            <Badge variant="secondary" className="bg-gradient-primary text-white border-0 shadow-glow">
+          <div className="absolute top-2 sm:top-4 left-1/2 transform -translate-x-1/2 z-40">
+            <Badge variant="secondary" className="bg-foreground text-background border-2 border-border font-sans font-bold uppercase tracking-wide">
               <Zap className="w-3 h-3 mr-1" />
               Demo Mode
             </Badge>
           </div>
         )}
         {/* Card stack effect - show next cards behind current */}
-        <div className="relative">
+        <div className="relative w-full max-w-sm">
           {unreadArticles.slice(currentIndex, currentIndex + 3).map((article, index) => (
             <SwipeCard
               key={article.id}
@@ -218,12 +218,12 @@ export const ReadMode = () => {
               onShare={handleShare}
               onSpeak={speak}
               className={cn(
-                "absolute transition-all duration-300",
+                "absolute transition-all duration-300 newspaper-enter",
                 index === 0 ? "z-30" : index === 1 ? "z-20" : "z-10"
               )}
               style={{
-                transform: `translateY(${index * 4}px) scale(${1 - index * 0.02})`,
-                opacity: 1 - index * 0.1
+                transform: `translateY(${index * 6}px) scale(${1 - index * 0.03})`,
+                opacity: 1 - index * 0.15
               }}
             />
           ))}

@@ -55,12 +55,12 @@ export const ReadModeHeader = ({
   };
 
   return (
-    <div className={cn("w-full bg-card/80 backdrop-blur-md border-b border-border/50", className)}>
-      <div className="max-w-sm mx-auto px-4 py-3">
+    <div className={cn("w-full bg-background border-b-2 border-border shadow-card", className)}>
+      <div className="max-w-sm mx-auto px-4 py-3 sm:py-4">
         {/* Top row - Title and actions */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <h1 className="text-lg font-bold bg-gradient-primary bg-clip-text text-transparent">
+            <h1 className="font-headline text-lg sm:text-xl font-bold text-foreground uppercase tracking-wider">
               READ MODE
             </h1>
             {isAllCaughtUp && (

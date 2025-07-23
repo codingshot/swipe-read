@@ -177,7 +177,7 @@ export const SwipeCard = ({
       onTouchEnd={handleEnd}
       onClick={handleCardClick}
     >
-      <Card className="h-[600px] bg-card shadow-card border border-border overflow-hidden relative transition-all duration-200 hover:shadow-elevated">
+      <Card className="h-[500px] sm:h-[600px] swipe-card overflow-hidden relative transition-all duration-200 hover:shadow-elevated animate-fade-in">
         {getSwipeIndicator()}
         
         <div className={cn(
@@ -201,12 +201,12 @@ export const SwipeCard = ({
             </div>
 
             {/* Title */}
-            <h2 className="text-xl font-bold text-foreground leading-tight mb-4 line-clamp-3">
+            <h2 className="font-headline text-2xl font-bold text-foreground leading-tight mb-4 line-clamp-3 headline-hover p-2 -m-2 rounded transition-colors duration-150">
               {item.title}
             </h2>
 
             {/* Description */}
-            <p className="text-muted-foreground text-sm leading-relaxed mb-6 flex-1 line-clamp-6">
+            <p className="font-body text-muted-foreground text-base leading-relaxed mb-6 flex-1 line-clamp-6">
               {item.description}
             </p>
 
@@ -232,41 +232,43 @@ export const SwipeCard = ({
             )}
 
             {/* Action buttons */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2">
               <Button
-                variant="outline"
+                variant="newspaper"
                 size="sm"
                 onClick={(e) => {
                   e.stopPropagation();
                   onSpeak(item.title + '. ' + item.description);
                 }}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 text-xs"
               >
-                <Volume2 className="w-4 h-4" />
-                Listen
+                <Volume2 className="w-3 h-3" />
+                LISTEN
               </Button>
               
-              <div className="flex gap-2">
+              <div className="flex gap-1">
                 <Button
-                  variant="outline"
+                  variant="newspaper"
                   size="sm"
                   onClick={(e) => {
                     e.stopPropagation();
                     window.open(item.link, '_blank');
                   }}
+                  className="px-2"
                 >
-                  <ExternalLink className="w-4 h-4" />
+                  <ExternalLink className="w-3 h-3" />
                 </Button>
                 
                 <Button
-                  variant="outline"
+                  variant="newspaper"
                   size="sm"
                   onClick={(e) => {
                     e.stopPropagation();
                     onShare(item);
                   }}
+                  className="px-2"
                 >
-                  <Share2 className="w-4 h-4" />
+                  <Share2 className="w-3 h-3" />
                 </Button>
               </div>
             </div>
