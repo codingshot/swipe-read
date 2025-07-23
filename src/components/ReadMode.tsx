@@ -314,7 +314,14 @@ export const ReadMode = () => {
             <div className="space-y-4">
               <h2 className="font-headline text-xl sm:text-2xl font-bold uppercase tracking-wide">ALL CAUGHT UP!</h2>
               <p className="font-body text-muted-foreground text-sm sm:text-base">
-                You've read all the latest articles from the selected time period.
+                You&apos;ve read all the latest articles from {
+                  timeFilter === 'day' ? 'today' :
+                  timeFilter === 'week' ? 'this week' :
+                  timeFilter === 'month' ? 'this month' :
+                  timeFilter === 'before' ? 'older articles' :
+                  timeFilter === 'all' ? 'all time' :
+                  'the selected time period'
+                }.
               </p>
               
               {/* Articles read by feed */}
