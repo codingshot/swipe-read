@@ -1,4 +1,4 @@
-import { ChevronDown, Globe } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 
@@ -23,7 +23,6 @@ export const FeedSelector = ({ feeds, currentFeed, onFeedChange, className }: Fe
     <Select value={currentFeed} onValueChange={onFeedChange}>
       <SelectTrigger className={cn("h-6 sm:h-8 border-2 border-border bg-background", className)}>
         <div className="flex items-center gap-1 sm:gap-2">
-          <Globe className="w-3 h-3 sm:w-4 sm:h-4" />
           <span className="text-xs sm:text-sm font-sans font-bold uppercase truncate">
             {selectedFeed?.name || 'Select Feed'}
           </span>
