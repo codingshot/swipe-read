@@ -198,11 +198,13 @@ export const SwipeCard = ({
     
     // Check if we're in the middle of a drag
     if (Math.abs(dragOffset.x) >= 5 || Math.abs(dragOffset.y) >= 5) {
+      e.preventDefault();
+      e.stopPropagation();
       return;
     }
     
-    // Check if clicking on or inside interactive elements
-    if (
+    // Check if clicking on or inside interactive elements with more comprehensive checking
+    const isInteractiveElement = 
       target.closest('button') ||
       target.closest('a') ||
       target.closest('[role="button"]') ||
@@ -211,12 +213,23 @@ export const SwipeCard = ({
       target.tagName === 'BUTTON' ||
       target.tagName === 'A' ||
       target.classList.contains('cursor-pointer') ||
-      // Check for specific interactive elements
-      target.closest('.feed-tag') ||
-      target.closest('.author-link') ||
-      target.closest('.twitter-link') ||
-      target.closest('.audio-button')
-    ) {
+      target.classList.contains('author-link') ||
+      target.classList.contains('twitter-link') ||
+      target.classList.contains('audio-button') ||
+      target.classList.contains('feed-tag') ||
+      // Check parent elements for interactive classes
+      target.parentElement?.classList.contains('cursor-pointer') ||
+      target.parentElement?.classList.contains('author-link') ||
+      target.parentElement?.classList.contains('twitter-link') ||
+      target.parentElement?.classList.contains('audio-button') ||
+      target.parentElement?.classList.contains('feed-tag') ||
+      // Check if clicking inside any interactive component areas
+      target.closest('.pointer-events-auto') ||
+      // Additional safety checks for nested elements
+      (target.closest('.flex') && target.closest('.flex').querySelector('button, a, [role="button"]'));
+    
+    if (isInteractiveElement) {
+      e.preventDefault();
       e.stopPropagation();
       return;
     }
