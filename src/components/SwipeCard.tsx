@@ -302,12 +302,7 @@ export const SwipeCard = ({
                       <Twitter className="w-3 h-3" />
                     </Button>}
                   
-                  <Button variant="newspaper" size="sm" onClick={e => {
-                  e.stopPropagation();
-                  setIsFlipped(false);
-                }} className="px-2">
-                    <X className="w-3 h-3" />
-                  </Button>
+                  
                 </div>
               </div>
               
