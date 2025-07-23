@@ -31,11 +31,6 @@ export const VerticalProgress = ({
             style={{ height: `${progressPercentage}%` }}
           />
         </div>
-        <div className="text-xs font-sans font-bold text-center leading-tight transform -rotate-90 origin-center whitespace-nowrap">
-          <div className="text-muted-foreground">
-            {Math.min(currentIndex + 1, totalArticles)}/{totalArticles} READ
-          </div>
-        </div>
       </div>
 
       {/* Daily Goal Progress */}
@@ -45,11 +40,6 @@ export const VerticalProgress = ({
             className="absolute bottom-0 left-0 right-0 bg-success transition-all duration-500"
             style={{ height: `${Math.min(dailyProgressPercentage, 100)}%` }}
           />
-        </div>
-        <div className="text-xs font-sans font-bold text-center leading-tight transform -rotate-90 origin-center whitespace-nowrap">
-          <div className="text-muted-foreground">
-            {todayRead}/{dailyGoal} DAILY
-          </div>
         </div>
       </div>
 
