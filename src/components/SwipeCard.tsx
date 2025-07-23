@@ -101,16 +101,18 @@ export const SwipeCard = ({
   const handleEnd = () => {
     if (!isDragging || isFlipped) return;
     
-    const threshold = 100;
+    const threshold = 80; // Reduced threshold for easier swiping
     const { x } = dragOffset;
     
     if (Math.abs(x) > threshold) {
       const direction = x > 0 ? 'right' : 'left';
       onSwipe(direction, item);
+    } else {
+      // Bounce back to center with spring animation
+      setDragOffset({ x: 0, y: 0 });
     }
     
     setIsDragging(false);
-    setDragOffset({ x: 0, y: 0 });
   };
 
   const handleCardClick = () => {
@@ -121,30 +123,30 @@ export const SwipeCard = ({
 
   const getSwipeIndicator = () => {
     const { x } = dragOffset;
-    const threshold = 100;
+    const threshold = 80;
     const opacity = Math.min(Math.abs(x) / threshold, 1);
     
-    if (x > 50) {
+    if (x > 40) {
       return (
         <div 
-          className="absolute inset-0 flex items-center justify-center bg-gradient-like/20 rounded-xl transition-opacity duration-200"
+          className="absolute inset-0 flex items-center justify-center bg-success/20 backdrop-blur-sm transition-all duration-200 border-2 border-success animate-pulse"
           style={{ opacity }}
         >
-          <div className="flex items-center gap-2 text-success font-bold text-xl">
-            <Heart className="w-8 h-8" />
-            LIKE
+          <div className="flex items-center gap-3 text-success font-bold text-xl animate-bounce">
+            <Heart className="w-10 h-10 fill-current" />
+            <span className="font-headline uppercase tracking-wide">LIKE</span>
           </div>
         </div>
       );
-    } else if (x < -50) {
+    } else if (x < -40) {
       return (
         <div 
-          className="absolute inset-0 flex items-center justify-center bg-gradient-dismiss/20 rounded-xl transition-opacity duration-200"
+          className="absolute inset-0 flex items-center justify-center bg-destructive/20 backdrop-blur-sm transition-all duration-200 border-2 border-destructive animate-pulse"
           style={{ opacity }}
         >
-          <div className="flex items-center gap-2 text-destructive font-bold text-xl">
-            <X className="w-8 h-8" />
-            PASS
+          <div className="flex items-center gap-3 text-destructive font-bold text-xl animate-bounce">
+            <X className="w-10 h-10 stroke-2" />
+            <span className="font-headline uppercase tracking-wide">PASS</span>
           </div>
         </div>
       );
@@ -152,20 +154,22 @@ export const SwipeCard = ({
     return null;
   };
 
-  const rotation = dragOffset.x * 0.1;
-  const scale = isDragging ? 0.95 : 1;
+  const rotation = dragOffset.x * 0.15;
+  const scale = isDragging ? 0.98 : 1;
+  const cardElevation = isDragging ? 8 : 0;
 
   return (
     <div
       ref={cardRef}
       className={cn(
         "relative w-full max-w-sm mx-auto cursor-grab active:cursor-grabbing",
-        "transform-gpu transition-transform duration-200",
-        isDragging ? "transition-none" : "",
+        "transform-gpu transition-all duration-200",
+        isDragging ? "transition-none z-50" : "transition-all duration-300 ease-out",
         className
       )}
       style={{
         transform: `translate(${dragOffset.x}px, ${dragOffset.y}px) rotate(${rotation}deg) scale(${scale})`,
+        filter: `drop-shadow(0 ${cardElevation}px ${cardElevation * 2}px rgba(0,0,0,0.15))`,
         ...style
       }}
       onMouseDown={handleMouseDown}
@@ -177,7 +181,11 @@ export const SwipeCard = ({
       onTouchEnd={handleEnd}
       onClick={handleCardClick}
     >
-      <Card className="h-[500px] sm:h-[600px] swipe-card overflow-hidden relative transition-all duration-200 hover:shadow-elevated animate-fade-in">
+      <Card className={cn(
+        "h-[500px] sm:h-[600px] swipe-card overflow-hidden relative animate-fade-in",
+        isDragging ? "dragging shadow-elevated border-4" : "hover:shadow-elevated transition-all duration-200",
+        "bg-background border-2 border-foreground"
+      )}>
         {getSwipeIndicator()}
         
         <div className={cn(

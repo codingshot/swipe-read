@@ -148,9 +148,24 @@
   
   .swipe-card {
     @apply border-2 border-foreground shadow-card bg-background;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  
+  .swipe-card.dragging {
+    transition: none;
+  }
+  
+  .swipe-bounce {
+    animation: swipe-bounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
   
   .button-newspaper {
     @apply border-2 border-foreground bg-background text-foreground font-sans font-bold uppercase tracking-wider text-sm px-4 py-2 transition-all duration-150 hover:bg-foreground hover:text-background;
+  }
+  
+  @keyframes swipe-bounce {
+    0% { transform: scale(0.98); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
   }
 }
