@@ -12,10 +12,11 @@ import { Link } from 'react-router-dom';
 interface ReadStoriesPopupProps {
   readArticles: NewsItem[];
   swipeActions: SwipeAction[];
+  onUpdateSwipeAction: (itemId: string, newAction: 'like' | 'dismiss' | 'bookmark') => void;
   trigger: React.ReactNode;
 }
 
-export const ReadStoriesPopup = ({ readArticles, swipeActions, trigger }: ReadStoriesPopupProps) => {
+export const ReadStoriesPopup = ({ readArticles, swipeActions, onUpdateSwipeAction, trigger }: ReadStoriesPopupProps) => {
   const [open, setOpen] = useState(false);
 
   const getSwipeAction = (articleId: string) => {
@@ -133,35 +134,60 @@ export const ReadStoriesPopup = ({ readArticles, swipeActions, trigger }: ReadSt
                       )}
                     </div>
 
-                    {/* Actions */}
-                    <div className="flex items-center justify-between pt-2 border-t border-border">
-                      <Link to={`/article/${article.id}`}>
-                        <Button variant="newspaper" size="sm" className="text-xs">
-                          READ AGAIN
-                        </Button>
-                      </Link>
-                      
-                      <div className="flex gap-1">
-                        {isTwitterSource(article) && (
-                          <Button
-                            variant="newspaper"
-                            size="sm"
-                            onClick={() => window.open(article.link, '_blank')}
-                            className="px-2"
-                          >
-                            <Twitter className="w-3 h-3" />
-                          </Button>
-                        )}
-                        <Button
-                          variant="newspaper"
-                          size="sm"
-                          onClick={() => window.open(article.link, '_blank')}
-                          className="px-2"
-                        >
-                          <ExternalLink className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    </div>
+                        {/* Actions */}
+                        <div className="flex items-center justify-between pt-2 border-t border-border">
+                          <div className="flex gap-1">
+                            <Link to={`/article/${article.id}`}>
+                              <Button variant="newspaper" size="sm" className="text-xs">
+                                READ AGAIN
+                              </Button>
+                            </Link>
+                            
+                            {/* Change action buttons */}
+                            {getSwipeAction(article.id)?.action === 'like' ? (
+                              <Button
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => onUpdateSwipeAction(article.id, 'dismiss')}
+                                className="text-xs px-2 border-destructive/50 text-destructive hover:bg-destructive/10"
+                                title="Change to skipped"
+                              >
+                                <X className="w-3 h-3" />
+                              </Button>
+                            ) : (
+                              <Button
+                                variant="outline"
+                                size="sm" 
+                                onClick={() => onUpdateSwipeAction(article.id, 'like')}
+                                className="text-xs px-2 border-success/50 text-success hover:bg-success/10"
+                                title="Change to liked"
+                              >
+                                <Heart className="w-3 h-3" />
+                              </Button>
+                            )}
+                          </div>
+                          
+                          <div className="flex gap-1">
+                            {isTwitterSource(article) && (
+                              <Button
+                                variant="newspaper"
+                                size="sm"
+                                onClick={() => window.open(article.link, '_blank')}
+                                className="px-2"
+                              >
+                                <Twitter className="w-3 h-3" />
+                              </Button>
+                            )}
+                            <Button
+                              variant="newspaper"
+                              size="sm"
+                              onClick={() => window.open(article.link, '_blank')}
+                              className="px-2"
+                            >
+                              <ExternalLink className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        </div>
                   </div>
                 </Card>
                   ))}
@@ -228,11 +254,24 @@ export const ReadStoriesPopup = ({ readArticles, swipeActions, trigger }: ReadSt
 
                         {/* Actions */}
                         <div className="flex items-center justify-between pt-2 border-t border-border">
-                          <Link to={`/article/${article.id}`}>
-                            <Button variant="newspaper" size="sm" className="text-xs">
-                              READ AGAIN
+                          <div className="flex gap-1">
+                            <Link to={`/article/${article.id}`}>
+                              <Button variant="newspaper" size="sm" className="text-xs">
+                                READ AGAIN
+                              </Button>
+                            </Link>
+                            
+                            {/* Change to skipped button */}
+                            <Button
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => onUpdateSwipeAction(article.id, 'dismiss')}
+                              className="text-xs px-2 border-destructive/50 text-destructive hover:bg-destructive/10"
+                              title="Change to skipped"
+                            >
+                              <X className="w-3 h-3" />
                             </Button>
-                          </Link>
+                          </div>
                           
                           <div className="flex gap-1">
                             {isTwitterSource(article) && (
@@ -321,11 +360,24 @@ export const ReadStoriesPopup = ({ readArticles, swipeActions, trigger }: ReadSt
 
                         {/* Actions */}
                         <div className="flex items-center justify-between pt-2 border-t border-border">
-                          <Link to={`/article/${article.id}`}>
-                            <Button variant="newspaper" size="sm" className="text-xs">
-                              READ NOW
+                          <div className="flex gap-1">
+                            <Link to={`/article/${article.id}`}>
+                              <Button variant="newspaper" size="sm" className="text-xs">
+                                READ NOW
+                              </Button>
+                            </Link>
+                            
+                            {/* Change to liked button */}
+                            <Button
+                              variant="outline"
+                              size="sm" 
+                              onClick={() => onUpdateSwipeAction(article.id, 'like')}
+                              className="text-xs px-2 border-success/50 text-success hover:bg-success/10"
+                              title="Change to liked"
+                            >
+                              <Heart className="w-3 h-3" />
                             </Button>
-                          </Link>
+                          </div>
                           
                           <div className="flex gap-1">
                             {isTwitterSource(article) && (

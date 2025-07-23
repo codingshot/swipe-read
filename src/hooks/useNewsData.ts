@@ -405,6 +405,36 @@ export const useNewsData = (initialTimeFilter: TimeFilter = 'day') => {
     saveForLater,
     setCurrentIndex,
     changeTimeFilter,
-    canUndo: swipeActions.length > 0 && currentIndex > 0
+    canUndo: swipeActions.length > 0 && currentIndex > 0,
+    updateSwipeAction: (itemId: string, newAction: 'like' | 'dismiss' | 'bookmark') => {
+      const existingActionIndex = swipeActions.findIndex(action => action.itemId === itemId);
+      let updatedActions = [...swipeActions];
+      
+      if (existingActionIndex >= 0) {
+        // Update existing action
+        updatedActions[existingActionIndex] = {
+          ...updatedActions[existingActionIndex],
+          action: newAction,
+          timestamp: Date.now()
+        };
+      } else {
+        // Add new action
+        updatedActions.push({
+          itemId,
+          action: newAction,
+          timestamp: Date.now()
+        });
+      }
+      
+      setSwipeActions(updatedActions);
+      saveToStorage(STORAGE_KEYS.SWIPE_ACTIONS, updatedActions);
+      
+      // Show feedback toast
+      const actionText = newAction === 'like' ? 'liked' : newAction === 'dismiss' ? 'skipped' : 'bookmarked';
+      toast({
+        title: `Article ${actionText}!`,
+        description: "Status updated successfully"
+      });
+    }
   };
 };

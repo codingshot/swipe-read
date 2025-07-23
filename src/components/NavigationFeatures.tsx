@@ -8,6 +8,7 @@ import { ReadStoriesPopup } from './ReadStoriesPopup';
 interface NavigationFeaturesProps {
   readArticles: NewsItem[];
   swipeActions: SwipeAction[];
+  onUpdateSwipeAction: (itemId: string, newAction: 'like' | 'dismiss' | 'bookmark') => void;
   savedCount: number;
   onViewSavedStories: () => void;
   className?: string;
@@ -16,6 +17,7 @@ interface NavigationFeaturesProps {
 export const NavigationFeatures = ({ 
   readArticles,
   swipeActions,
+  onUpdateSwipeAction,
   savedCount,
   onViewSavedStories,
   className 
@@ -30,6 +32,7 @@ export const NavigationFeatures = ({
         <ReadStoriesPopup 
           readArticles={readArticles}
           swipeActions={swipeActions}
+          onUpdateSwipeAction={onUpdateSwipeAction}
           trigger={
           <div className="relative group">
             <Button

@@ -35,7 +35,8 @@ export const ReadMode = () => {
     shareArticle,
     setCurrentIndex,
     changeTimeFilter,
-    canUndo
+    canUndo,
+    updateSwipeAction
   } = useNewsData();
 
   const { speak } = useSpeech();
@@ -346,6 +347,7 @@ export const ReadMode = () => {
       <NavigationFeatures
         readArticles={readArticles}
         swipeActions={swipeActions}
+        onUpdateSwipeAction={updateSwipeAction}
         savedCount={savedForLaterArticles.length}
         onViewSavedStories={handleViewSavedStories}
       />
