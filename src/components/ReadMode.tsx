@@ -495,8 +495,7 @@ export const ReadMode = () => {
       <VerticalProgress
         currentIndex={currentIndex}
         totalArticles={unreadArticles.length}
-        todayRead={dailyStats.todayRead}
-        dailyGoal={dailyStats.dailyGoal}
+        readArticles={readArticles.length}
       />
 
       {/* Coming Soon Features on Right with Share Button */}

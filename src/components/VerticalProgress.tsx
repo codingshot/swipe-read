@@ -3,20 +3,18 @@ import { cn } from '@/lib/utils';
 interface VerticalProgressProps {
   currentIndex: number;
   totalArticles: number;
-  todayRead: number;
-  dailyGoal: number;
+  readArticles: number; // Changed from todayRead to readArticles for current query
   className?: string;
 }
 
 export const VerticalProgress = ({
   currentIndex,
   totalArticles,
-  todayRead,
-  dailyGoal,
+  readArticles,
   className
 }: VerticalProgressProps) => {
   const progressPercentage = totalArticles > 0 ? ((currentIndex + 1) / totalArticles) * 100 : 0;
-  const dailyProgressPercentage = (todayRead / dailyGoal) * 100;
+  const readProgressPercentage = totalArticles > 0 ? (readArticles / totalArticles) * 100 : 0;
 
   return (
     <div className={cn(
@@ -33,22 +31,15 @@ export const VerticalProgress = ({
         </div>
       </div>
 
-      {/* Daily Goal Progress */}
+      {/* Query Progress */}
       <div className="flex flex-col items-center gap-2">
         <div className="w-2 h-24 bg-border border-2 border-foreground relative overflow-hidden">
           <div 
             className="absolute bottom-0 left-0 right-0 bg-success transition-all duration-500"
-            style={{ height: `${Math.min(dailyProgressPercentage, 100)}%` }}
+            style={{ height: `${Math.min(readProgressPercentage, 100)}%` }}
           />
         </div>
       </div>
-
-      {/* Goal indicator */}
-      {dailyProgressPercentage >= 100 && (
-        <div className="text-success animate-bounce">
-          🎯
-        </div>
-      )}
     </div>
   );
 };
