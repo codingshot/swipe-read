@@ -5,6 +5,7 @@ import { SwipeActions } from './SwipeActions';
 import { VerticalProgress } from './VerticalProgress';
 import { ComingSoonFeatures } from './ComingSoonFeatures';
 import { NavigationFeatures } from './NavigationFeatures';
+import { PlayModeTimer } from './PlayModeTimer';
 import { useNewsData } from '@/hooks/useNewsData';
 import { useSpeech } from '@/hooks/useSpeech';
 import { calculateReadingTime } from '@/hooks/useTypingAnimation';
@@ -65,6 +66,13 @@ export const ReadMode = () => {
       setAutoPlayInterval(null);
     }
   }, [isAutoPlay, currentIndex, unreadArticles.length, isAllCaughtUp, setCurrentIndex, currentArticle]);
+
+  // Get current auto-play delay for timer display
+  const getCurrentAutoPlayDelay = () => {
+    if (!currentArticle) return 5000;
+    const readingTime = calculateReadingTime(currentArticle.description, currentArticle.title);
+    return Math.max(5000, readingTime * 1000);
+  };
 
   const handleLike = () => {
     if (currentArticle) {
@@ -297,6 +305,20 @@ export const ReadMode = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Play Mode Timer - Shows at top when auto-play is active */}
+      <PlayModeTimer 
+        isPlaying={isAutoPlay}
+        duration={getCurrentAutoPlayDelay()}
+        onComplete={() => {
+          if (currentIndex < unreadArticles.length - 1) {
+            setCurrentIndex(currentIndex + 1);
+          } else {
+            setIsAutoPlay(false);
+          }
+        }}
+        key={`${currentIndex}-${isAutoPlay}`} // Reset timer when article changes or auto-play toggles
+      />
+
       <ReadModeHeader
         currentIndex={currentIndex}
         totalArticles={unreadArticles.length}
