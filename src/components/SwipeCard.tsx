@@ -153,8 +153,15 @@ export const SwipeCard = ({
     setIsDragging(false);
   };
   const handleCardClick = (e: React.MouseEvent) => {
-    // Don't flip card if clicking on interactive elements
+    // Don't flip card if clicking on interactive elements or if we're dragging
     const target = e.target as HTMLElement;
+    
+    // Check if we're in the middle of a drag
+    if (Math.abs(dragOffset.x) >= 5 || Math.abs(dragOffset.y) >= 5) {
+      return;
+    }
+    
+    // Check if clicking on or inside interactive elements
     if (
       target.closest('button') ||
       target.closest('a') ||
@@ -162,15 +169,20 @@ export const SwipeCard = ({
       target.closest('.pointer-events-auto') ||
       target.hasAttribute('onclick') ||
       target.tagName === 'BUTTON' ||
-      target.tagName === 'A'
+      target.tagName === 'A' ||
+      target.classList.contains('cursor-pointer') ||
+      // Check for specific interactive elements
+      target.closest('.feed-tag') ||
+      target.closest('.author-link') ||
+      target.closest('.twitter-link') ||
+      target.closest('.audio-button')
     ) {
+      e.stopPropagation();
       return;
     }
 
-    // Only flip if it's a small movement (not a drag)
-    if (Math.abs(dragOffset.x) < 5 && Math.abs(dragOffset.y) < 5) {
-      setIsFlipped(!isFlipped);
-    }
+    // Only flip if clicking on safe areas
+    setIsFlipped(!isFlipped);
   };
   const getSwipeIndicator = () => {
     const {
@@ -232,7 +244,7 @@ export const SwipeCard = ({
                 e.preventDefault();
                 e.stopPropagation();
                 onSpeak(item.title + '. ' + getClippedDescription());
-              }} className="h-6 w-6 p-0 pointer-events-auto" title="Listen to article">
+              }} className="h-6 w-6 p-0 pointer-events-auto audio-button" title="Listen to article">
                 <Volume2 className="w-3 h-3" />
               </Button>
             </div>
@@ -258,7 +270,7 @@ export const SwipeCard = ({
                       const twitterHandle = author.name.replace('@', '');
                       const twitterUrl = author.name.startsWith('@') ? `https://twitter.com/${twitterHandle}` : `https://twitter.com/search?q=${encodeURIComponent(author.name)}`;
                       window.open(twitterUrl, '_blank');
-                    }} className="hover:text-foreground transition-colors underline cursor-pointer truncate">
+                    }} className="hover:text-foreground transition-colors underline cursor-pointer truncate author-link">
                               {author.name}
                             </button> : <span className="truncate">{author.name}</span>}
                           {index < item.author.length - 1 && ', '}
@@ -268,7 +280,7 @@ export const SwipeCard = ({
                         e.preventDefault();
                         e.stopPropagation();
                         window.open(item.link, '_blank');
-                      }} className="px-1 py-0 h-auto text-muted-foreground hover:text-foreground flex-shrink-0" title="Open on Twitter/X">
+                      }} className="px-1 py-0 h-auto text-muted-foreground hover:text-foreground flex-shrink-0 twitter-link" title="Open on Twitter/X">
                         <Twitter className="w-3 h-3" />
                       </Button>}
                   </div>
@@ -277,7 +289,7 @@ export const SwipeCard = ({
                   {feedName && feedId && onSwitchToFeed && (
                     <Badge 
                       variant="outline" 
-                      className="text-xs border-primary/50 bg-primary/10 hover:bg-primary/20 cursor-pointer transition-colors flex-shrink-0"
+                      className="text-xs border-primary/50 bg-primary/10 hover:bg-primary/20 cursor-pointer transition-colors flex-shrink-0 feed-tag"
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();

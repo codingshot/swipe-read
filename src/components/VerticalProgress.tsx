@@ -33,7 +33,7 @@ export const VerticalProgress = ({
         </div>
         <div className="text-xs font-sans font-bold text-center leading-tight transform -rotate-90 origin-center whitespace-nowrap">
           <div className="text-muted-foreground">
-            {Math.min(currentIndex + 1, totalArticles)}/{totalArticles} STORIES
+            {Math.min(currentIndex + 1, totalArticles)}/{totalArticles} READ
           </div>
         </div>
       </div>
