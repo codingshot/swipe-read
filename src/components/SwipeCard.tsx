@@ -177,7 +177,7 @@ export const SwipeCard = ({
       onTouchEnd={handleEnd}
       onClick={handleCardClick}
     >
-      <Card className="h-[600px] bg-gradient-card shadow-card border-0 overflow-hidden relative">
+      <Card className="h-[600px] bg-card shadow-card border border-border overflow-hidden relative transition-all duration-200 hover:shadow-elevated">
         {getSwipeIndicator()}
         
         <div className={cn(

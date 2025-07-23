@@ -6,7 +6,8 @@ import { useNewsData } from '@/hooks/useNewsData';
 import { useSpeech } from '@/hooks/useSpeech';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Coffee } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { RefreshCw, Coffee, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export const ReadMode = () => {
@@ -17,11 +18,13 @@ export const ReadMode = () => {
     currentIndex,
     unreadArticles,
     dailyStats,
+    timeFilter,
     handleSwipe,
     handleBookmark,
     undoLastAction,
     shareArticle,
     setCurrentIndex,
+    changeTimeFilter,
     canUndo
   } = useNewsData();
 
@@ -129,9 +132,10 @@ export const ReadMode = () => {
           todayRead={dailyStats.todayRead}
           dailyGoal={dailyStats.dailyGoal}
           isAutoPlay={false}
+          timeFilter={timeFilter}
           onToggleAutoPlay={() => {}}
+          onTimeFilterChange={changeTimeFilter}
           onOpenSettings={() => {}}
-          onOpenFilters={() => {}}
         />
         
         <div className="flex items-center justify-center min-h-[calc(100vh-120px)] p-4">
@@ -188,12 +192,22 @@ export const ReadMode = () => {
         todayRead={dailyStats.todayRead}
         dailyGoal={dailyStats.dailyGoal}
         isAutoPlay={isAutoPlay}
+        timeFilter={timeFilter}
         onToggleAutoPlay={handleToggleAutoPlay}
+        onTimeFilterChange={changeTimeFilter}
         onOpenSettings={() => {}}
-        onOpenFilters={() => {}}
       />
       
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)] p-4 relative">
+        {/* Demo mode indicator */}
+        {timeFilter === 'demo' && (
+          <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-40">
+            <Badge variant="secondary" className="bg-gradient-primary text-white border-0 shadow-glow">
+              <Zap className="w-3 h-3 mr-1" />
+              Demo Mode
+            </Badge>
+          </div>
+        )}
         {/* Card stack effect - show next cards behind current */}
         <div className="relative">
           {unreadArticles.slice(currentIndex, currentIndex + 3).map((article, index) => (

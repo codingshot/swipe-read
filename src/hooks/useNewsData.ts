@@ -34,27 +34,33 @@ interface SwipeAction {
   timestamp: number;
 }
 
+export type TimeFilter = 'day' | 'week' | 'all' | 'demo';
+
 const RSS_API_URL = 'https://grants-rss.up.railway.app/api/items';
 const STORAGE_KEYS = {
   READ_ITEMS: 'read_mode_read_items',
   SWIPE_ACTIONS: 'read_mode_swipe_actions',
   DAILY_STATS: 'read_mode_daily_stats',
-  FILTERS: 'read_mode_filters'
+  FILTERS: 'read_mode_filters',
+  TIME_FILTER: 'read_mode_time_filter'
 };
 
-export const useNewsData = () => {
+export const useNewsData = (initialTimeFilter: TimeFilter = 'day') => {
   const [articles, setArticles] = useState<NewsItem[]>([]);
+  const [allArticles, setAllArticles] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [readItems, setReadItems] = useState<Set<string>>(new Set());
   const [swipeActions, setSwipeActions] = useState<SwipeAction[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [timeFilter, setTimeFilter] = useState<TimeFilter>(initialTimeFilter);
   const { toast } = useToast();
 
   // Load data from localStorage
   useEffect(() => {
     const savedReadItems = localStorage.getItem(STORAGE_KEYS.READ_ITEMS);
     const savedSwipeActions = localStorage.getItem(STORAGE_KEYS.SWIPE_ACTIONS);
+    const savedTimeFilter = localStorage.getItem(STORAGE_KEYS.TIME_FILTER);
 
     if (savedReadItems) {
       setReadItems(new Set(JSON.parse(savedReadItems)));
@@ -63,7 +69,37 @@ export const useNewsData = () => {
     if (savedSwipeActions) {
       setSwipeActions(JSON.parse(savedSwipeActions));
     }
+
+    if (savedTimeFilter) {
+      setTimeFilter(savedTimeFilter as TimeFilter);
+    }
   }, []);
+
+  // Filter articles based on time period
+  const filterArticlesByTime = (articlesData: NewsItem[], filter: TimeFilter): NewsItem[] => {
+    if (filter === 'all' || filter === 'demo') {
+      return articlesData;
+    }
+
+    const now = new Date();
+    let cutoffDate: Date;
+
+    switch (filter) {
+      case 'day':
+        cutoffDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        break;
+      case 'week':
+        cutoffDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      default:
+        return articlesData;
+    }
+
+    return articlesData.filter((article: NewsItem) => {
+      const articleDate = new Date(article.date);
+      return articleDate > cutoffDate;
+    });
+  };
 
   // Fetch articles from RSS API
   useEffect(() => {
@@ -79,28 +115,45 @@ export const useNewsData = () => {
 
         const data = await response.json();
         
-        // Filter articles from the last 24 hours
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        
-        const recentArticles = data.filter((article: NewsItem) => {
-          const articleDate = new Date(article.date);
-          return articleDate > yesterday;
-        });
-
         // Sort by date (newest first)
-        recentArticles.sort((a: NewsItem, b: NewsItem) => 
+        const sortedArticles = data.sort((a: NewsItem, b: NewsItem) => 
           new Date(b.date).getTime() - new Date(a.date).getTime()
         );
 
-        setArticles(recentArticles);
+        setAllArticles(sortedArticles);
+
+        // Apply initial time filter
+        const filteredArticles = filterArticlesByTime(sortedArticles, timeFilter);
+        setArticles(filteredArticles);
         
-        if (recentArticles.length === 0) {
-          toast({
-            title: "No recent articles",
-            description: "No articles found from the last 24 hours.",
-          });
+        // Reset current index when filter changes
+        setCurrentIndex(0);
+
+        // Check if we need to suggest alternative filters
+        if (filteredArticles.length === 0) {
+          if (timeFilter === 'day') {
+            const weekArticles = filterArticlesByTime(sortedArticles, 'week');
+            if (weekArticles.length > 0) {
+              toast({
+                title: "No articles today",
+                description: `Found ${weekArticles.length} articles from this week. Try switching to week view in settings.`,
+              });
+            } else if (sortedArticles.length > 0) {
+              toast({
+                title: "No recent articles",
+                description: `Found ${sortedArticles.length} older articles. Try demo mode to explore them.`,
+              });
+            }
+          } else if (timeFilter === 'week') {
+            if (sortedArticles.length > 0) {
+              toast({
+                title: "No articles this week",
+                description: `Found ${sortedArticles.length} older articles. Try demo mode to explore them.`,
+              });
+            }
+          }
         }
+
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to fetch articles';
         setError(errorMessage);
@@ -115,7 +168,38 @@ export const useNewsData = () => {
     };
 
     fetchArticles();
-  }, [toast]);
+  }, [toast, timeFilter]);
+
+  // Change time filter
+  const changeTimeFilter = (newFilter: TimeFilter) => {
+    setTimeFilter(newFilter);
+    localStorage.setItem(STORAGE_KEYS.TIME_FILTER, newFilter);
+    
+    const filteredArticles = filterArticlesByTime(allArticles, newFilter);
+    setArticles(filteredArticles);
+    setCurrentIndex(0);
+
+    let description = '';
+    switch (newFilter) {
+      case 'day':
+        description = 'Showing articles from the last 24 hours';
+        break;
+      case 'week':
+        description = 'Showing articles from the last 7 days';
+        break;
+      case 'all':
+        description = 'Showing all available articles';
+        break;
+      case 'demo':
+        description = 'Demo mode: explore past articles';
+        break;
+    }
+
+    toast({
+      title: `Switched to ${newFilter} view`,
+      description: `${description} (${filteredArticles.length} articles)`,
+    });
+  };
 
   // Save data to localStorage
   const saveToStorage = (key: string, data: any) => {
@@ -149,7 +233,8 @@ export const useNewsData = () => {
     markAsRead(item.id);
     
     // Move to next article
-    if (currentIndex < articles.length - 1) {
+    const unreadCount = getUnreadArticles().length;
+    if (currentIndex < unreadCount - 1) {
       setCurrentIndex(currentIndex + 1);
     }
 
@@ -262,11 +347,13 @@ export const useNewsData = () => {
 
   return {
     articles,
+    allArticles,
     loading,
     error,
     currentIndex,
     readItems,
     swipeActions,
+    timeFilter,
     unreadArticles: getUnreadArticles(),
     dailyStats: getDailyStats(),
     handleSwipe,
@@ -275,6 +362,7 @@ export const useNewsData = () => {
     shareArticle,
     markAsRead,
     setCurrentIndex,
+    changeTimeFilter,
     canUndo: swipeActions.length > 0 && currentIndex > 0
   };
 };
