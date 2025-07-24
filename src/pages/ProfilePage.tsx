@@ -38,9 +38,12 @@ export function ProfilePage() {
   const [readingFrequency, setReadingFrequency] = useState(() =>
     localStorage.getItem('reading_frequency') || 'daily'
   );
-  const [selectedFeeds, setSelectedFeeds] = useState<string[]>(() => {
+  
+  // Get selected feeds from feeds hook instead of localStorage
+  const actualSelectedFeeds = feeds.filter(feed => {
     const stored = localStorage.getItem('selected_feeds');
-    return stored ? JSON.parse(stored) : [];
+    const selectedFeedIds = stored ? JSON.parse(stored) : [];
+    return selectedFeedIds.includes(feed.id);
   });
 
   // Calculate daily stats manually
@@ -51,10 +54,23 @@ export function ProfilePage() {
     ).length
   };
 
-  // Get read articles by checking which articles have been swiped
-  const readArticles: NewsItem[] = [];
-  // Note: We'll need to fetch articles to properly display them
-  // For now, we'll show placeholder data based on swipe actions
+  // Get feed statistics
+  const getFeedStats = () => {
+    const feedCounts: { [feedName: string]: number } = {};
+    
+    swipeActions.forEach(action => {
+      if (action.feedName) {
+        feedCounts[action.feedName] = (feedCounts[action.feedName] || 0) + 1;
+      }
+    });
+    
+    return Object.entries(feedCounts)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 3)
+      .map(([feedName, count]) => ({ feedName, count }));
+  };
+
+  const topFeeds = getFeedStats();
 
   // Set SEO for profile page
   useSEO({
@@ -175,15 +191,28 @@ export function ProfilePage() {
                 </CardContent>
               </Card>
               
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">Daily Goal</CardTitle>
-                </CardHeader>
-                <CardContent>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg">Daily Goal</CardTitle>
+              </CardHeader>
+              <CardContent>
                 <div className="text-3xl font-bold text-blue-600">{dailyStats.articlesRead}/{dailyGoal}</div>
-                  <p className="text-sm text-muted-foreground">Articles today</p>
-                </CardContent>
-              </Card>
+                <p className="text-sm text-muted-foreground">Articles today</p>
+                {topFeeds.length > 0 && (
+                  <div className="mt-3 pt-3 border-t border-border">
+                    <p className="text-xs text-muted-foreground mb-2">Top feeds:</p>
+                    <div className="space-y-1">
+                      {topFeeds.map(({ feedName, count }) => (
+                        <div key={feedName} className="flex justify-between text-xs">
+                          <span className="truncate">{feedName}</span>
+                          <span className="font-medium">{count}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
             </div>
 
             <Card>
@@ -193,15 +222,12 @@ export function ProfilePage() {
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  {selectedFeeds.map(feedId => {
-                    const feed = feeds.find(f => f.id === feedId);
-                    return feed ? (
-                      <Badge key={feedId} variant="secondary">
-                        {feed.name}
-                      </Badge>
-                    ) : null;
-                  })}
-                  {selectedFeeds.length === 0 && (
+                  {actualSelectedFeeds.map(feed => (
+                    <Badge key={feed.id} variant="secondary">
+                      {feed.name}
+                    </Badge>
+                  ))}
+                  {actualSelectedFeeds.length === 0 && (
                     <p className="text-muted-foreground">No feeds selected</p>
                   )}
                 </div>
@@ -221,36 +247,44 @@ export function ProfilePage() {
               <TabsContent value="all">
                 <div className="space-y-4">
                   {swipeActions.map(action => (
-                    <Card key={action.itemId}>
+                    <Card key={action.itemId} className="overflow-hidden">
                       <CardContent className="p-4">
                         <div className="flex justify-between items-start gap-4">
-                          <div className="flex-1">
-                            <h3 className="font-medium line-clamp-2 mb-1">Article ID: {action.itemId}</h3>
-                            <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-                              {action.feedName || 'Unknown feed'}
-                            </p>
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                              <span>{action.feedName || 'Unknown'}</span>
-                              <span>•</span>
-                              <span>{formatTimeAgo(new Date(action.timestamp).toISOString())}</span>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-2">
+                              {action.action === 'like' && (
+                                <Badge variant="default" className="bg-green-100 text-green-800 flex-shrink-0">
+                                  ❤️ Liked
+                                </Badge>
+                              )}
+                              {action.action === 'dismiss' && (
+                                <Badge variant="secondary" className="flex-shrink-0">
+                                  👎 Skipped
+                                </Badge>
+                              )}
+                              {action.action === 'bookmark' && (
+                                <Badge variant="outline" className="flex-shrink-0">
+                                  🔖 Saved
+                                </Badge>
+                              )}
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground min-w-0">
+                                <span className="truncate">{action.feedName || 'Unknown feed'}</span>
+                                <span>•</span>
+                                <span className="flex-shrink-0">{formatTimeAgo(new Date(action.timestamp).toISOString())}</span>
+                              </div>
                             </div>
-                          </div>
-                          <div className="flex flex-col gap-2">
-                            {action.action === 'like' && (
-                              <Badge variant="default" className="bg-green-100 text-green-800">
-                                ❤️ Liked
-                              </Badge>
-                            )}
-                            {action.action === 'dismiss' && (
-                              <Badge variant="secondary">
-                                👎 Skipped
-                              </Badge>
-                            )}
-                            {action.action === 'bookmark' && (
-                              <Badge variant="outline">
-                                🔖 Saved
-                              </Badge>
-                            )}
+                            <div className="bg-muted/50 rounded-lg p-3 border">
+                              <div className="flex items-start gap-3">
+                                <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0"></div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm text-muted-foreground mb-1">Article Preview</p>
+                                  <p className="text-xs font-mono text-muted-foreground/80 truncate">ID: {action.itemId}</p>
+                                  <p className="text-sm mt-2 text-foreground">
+                                    This article was {action.action === 'like' ? 'liked' : action.action === 'dismiss' ? 'skipped' : 'bookmarked'} from {action.feedName || 'an unknown feed'}.
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </CardContent>
@@ -267,23 +301,33 @@ export function ProfilePage() {
               <TabsContent value="liked">
                 <div className="space-y-4">
                   {likedActions.map(action => (
-                    <Card key={action.itemId}>
+                    <Card key={action.itemId} className="overflow-hidden">
                       <CardContent className="p-4">
                         <div className="flex justify-between items-start gap-4">
-                          <div className="flex-1">
-                            <h3 className="font-medium line-clamp-2 mb-1">Article ID: {action.itemId}</h3>
-                            <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-                              {action.feedName || 'Unknown feed'}
-                            </p>
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                              <span>{action.feedName || 'Unknown'}</span>
-                              <span>•</span>
-                              <span>{formatTimeAgo(new Date(action.timestamp).toISOString())}</span>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Badge variant="default" className="bg-green-100 text-green-800 flex-shrink-0">
+                                ❤️ Liked
+                              </Badge>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground min-w-0">
+                                <span className="truncate">{action.feedName || 'Unknown feed'}</span>
+                                <span>•</span>
+                                <span className="flex-shrink-0">{formatTimeAgo(new Date(action.timestamp).toISOString())}</span>
+                              </div>
+                            </div>
+                            <div className="bg-green-50 dark:bg-green-950/20 rounded-lg p-3 border border-green-200 dark:border-green-800">
+                              <div className="flex items-start gap-3">
+                                <div className="w-2 h-2 rounded-full bg-green-600 mt-2 flex-shrink-0"></div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm text-green-700 dark:text-green-300 mb-1">Liked Article</p>
+                                  <p className="text-xs font-mono text-green-600 dark:text-green-400 truncate">ID: {action.itemId}</p>
+                                  <p className="text-sm mt-2 text-green-800 dark:text-green-200">
+                                    You loved this article from {action.feedName || 'an unknown feed'}. Great content!
+                                  </p>
+                                </div>
+                              </div>
                             </div>
                           </div>
-                          <Badge variant="default" className="bg-green-100 text-green-800">
-                            ❤️ Liked
-                          </Badge>
                         </div>
                       </CardContent>
                     </Card>
@@ -299,23 +343,33 @@ export function ProfilePage() {
               <TabsContent value="skipped">
                 <div className="space-y-4">
                   {skippedActions.map(action => (
-                    <Card key={action.itemId}>
+                    <Card key={action.itemId} className="overflow-hidden">
                       <CardContent className="p-4">
                         <div className="flex justify-between items-start gap-4">
-                          <div className="flex-1">
-                            <h3 className="font-medium line-clamp-2 mb-1">Article ID: {action.itemId}</h3>
-                            <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-                              {action.feedName || 'Unknown feed'}
-                            </p>
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                              <span>{action.feedName || 'Unknown'}</span>
-                              <span>•</span>
-                              <span>{formatTimeAgo(new Date(action.timestamp).toISOString())}</span>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Badge variant="secondary" className="flex-shrink-0">
+                                👎 Skipped
+                              </Badge>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground min-w-0">
+                                <span className="truncate">{action.feedName || 'Unknown feed'}</span>
+                                <span>•</span>
+                                <span className="flex-shrink-0">{formatTimeAgo(new Date(action.timestamp).toISOString())}</span>
+                              </div>
+                            </div>
+                            <div className="bg-muted/30 rounded-lg p-3 border border-muted">
+                              <div className="flex items-start gap-3">
+                                <div className="w-2 h-2 rounded-full bg-muted-foreground mt-2 flex-shrink-0"></div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm text-muted-foreground mb-1">Skipped Article</p>
+                                  <p className="text-xs font-mono text-muted-foreground/80 truncate">ID: {action.itemId}</p>
+                                  <p className="text-sm mt-2 text-muted-foreground">
+                                    You skipped this article from {action.feedName || 'an unknown feed'}. No worries!
+                                  </p>
+                                </div>
+                              </div>
                             </div>
                           </div>
-                          <Badge variant="secondary">
-                            👎 Skipped
-                          </Badge>
                         </div>
                       </CardContent>
                     </Card>
