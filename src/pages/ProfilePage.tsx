@@ -291,74 +291,103 @@ export function ProfilePage() {
                   {swipeActions.map(action => {
                     const article = getArticleFromAction(action);
                     return (
-                      <Card key={action.itemId} className="overflow-hidden">
-                        <CardContent className="p-4">
-                          <div className="flex justify-between items-start gap-4">
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-3">
-                                {action.action === 'like' && (
-                                  <Badge variant="default" className="bg-green-100 text-green-800 flex-shrink-0">
-                                    ❤️ Liked
-                                  </Badge>
-                                )}
-                                {action.action === 'dismiss' && (
-                                  <Badge variant="secondary" className="flex-shrink-0">
-                                    👎 Skipped
-                                  </Badge>
-                                )}
-                                {action.action === 'bookmark' && (
-                                  <Badge variant="outline" className="flex-shrink-0">
-                                    🔖 Saved
-                                  </Badge>
-                                )}
-                                <div className="flex items-center gap-2 text-xs text-muted-foreground min-w-0">
-                                  <span className="truncate">{action.feedName || 'Unknown feed'}</span>
-                                  <span>•</span>
-                                  <span className="flex-shrink-0">{formatTimeAgo(new Date(action.timestamp).toISOString())}</span>
+                      <Card key={action.itemId} className="overflow-hidden hover:shadow-md transition-shadow">
+                        <CardContent className="p-0">
+                          {article ? (
+                            <div className="p-4 space-y-4">
+                              {/* Action badge and meta info */}
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2">
+                                  {action.action === 'like' && (
+                                    <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
+                                      ❤️ Liked
+                                    </Badge>
+                                  )}
+                                  {action.action === 'dismiss' && (
+                                    <Badge variant="secondary">
+                                      👎 Skipped
+                                    </Badge>
+                                  )}
+                                  {action.action === 'bookmark' && (
+                                    <Badge variant="outline">
+                                      🔖 Saved
+                                    </Badge>
+                                  )}
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  {formatTimeAgo(new Date(action.timestamp).toISOString())}
                                 </div>
                               </div>
                               
-                              {article ? (
-                                <div className="bg-background border rounded-lg p-4 space-y-3">
-                                  <h3 className="font-semibold text-sm line-clamp-2 leading-relaxed">
-                                    {article.title}
-                                  </h3>
-                                  <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
-                                    {article.description}
-                                  </p>
-                                  <div className="flex items-center justify-between pt-2">
-                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                      {article.author && article.author.length > 0 && (
-                                        <>
-                                          <span>by {article.author[0].name}</span>
-                                          <span>•</span>
-                                        </>
-                                      )}
-                                      <span>{new Date(article.date).toLocaleDateString()}</span>
-                                    </div>
-                                    <Button 
-                                      variant="ghost" 
-                                      size="sm" 
-                                      className="h-6 text-xs"
-                                      onClick={() => window.open(article.link, '_blank')}
-                                    >
-                                      Read →
-                                    </Button>
+                              {/* Article card similar to swipe cards */}
+                              <div className="border border-border rounded-lg p-4 bg-card/50 hover:bg-card transition-colors">
+                                <h3 className="font-headline font-bold text-lg leading-tight mb-3 line-clamp-2">
+                                  {article.title}
+                                </h3>
+                                
+                                <p className="text-muted-foreground text-sm leading-relaxed mb-4 line-clamp-3">
+                                  {article.description}
+                                </p>
+                                
+                                <div className="flex items-center justify-between pt-3 border-t border-border">
+                                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                    <span className="font-medium">{action.feedName || 'Unknown feed'}</span>
+                                    {article.author && article.author.length > 0 && (
+                                      <>
+                                        <span>•</span>
+                                        <span>by {article.author[0].name}</span>
+                                      </>
+                                    )}
+                                    <span>•</span>
+                                    <span>{new Date(article.date).toLocaleDateString()}</span>
                                   </div>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="h-7 text-xs px-3"
+                                    onClick={() => window.open(article.link, '_blank')}
+                                  >
+                                    Read Article
+                                  </Button>
                                 </div>
-                              ) : (
-                                <div className="bg-muted/50 rounded-lg p-3 border">
-                                  <div className="flex items-start gap-3">
-                                    <div className="w-2 h-2 rounded-full bg-muted-foreground mt-2 flex-shrink-0"></div>
-                                    <div className="flex-1 min-w-0">
-                                      <p className="text-sm text-muted-foreground mb-1">Article no longer available</p>
-                                      <p className="text-xs font-mono text-muted-foreground/80 truncate">ID: {action.itemId}</p>
-                                    </div>
-                                  </div>
-                                </div>
-                              )}
+                              </div>
                             </div>
-                          </div>
+                          ) : (
+                            <div className="p-4">
+                              <div className="flex items-center justify-between gap-2 mb-3">
+                                <div className="flex items-center gap-2">
+                                  {action.action === 'like' && (
+                                    <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
+                                      ❤️ Liked
+                                    </Badge>
+                                  )}
+                                  {action.action === 'dismiss' && (
+                                    <Badge variant="secondary">
+                                      👎 Skipped
+                                    </Badge>
+                                  )}
+                                  {action.action === 'bookmark' && (
+                                    <Badge variant="outline">
+                                      🔖 Saved
+                                    </Badge>
+                                  )}
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  {formatTimeAgo(new Date(action.timestamp).toISOString())}
+                                </div>
+                              </div>
+                              
+                              <div className="bg-muted/50 rounded-lg p-4 border border-dashed">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-3 h-3 rounded-full bg-muted-foreground/50"></div>
+                                  <div>
+                                    <p className="text-sm text-muted-foreground mb-1">Article no longer available</p>
+                                    <p className="text-xs text-muted-foreground/70">From: {action.feedName || 'Unknown feed'}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </CardContent>
                       </Card>
                     );
@@ -376,72 +405,82 @@ export function ProfilePage() {
                   {likedActions.map(action => {
                     const article = getArticleFromAction(action);
                     return (
-                      <Card key={action.itemId} className="overflow-hidden border-green-200 dark:border-green-800">
-                        <CardContent className="p-4">
-                          <div className="flex justify-between items-start gap-4">
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-3">
-                                <Badge variant="default" className="bg-green-100 text-green-800 flex-shrink-0">
+                      <Card key={action.itemId} className="overflow-hidden border-green-200 dark:border-green-800 hover:shadow-md transition-shadow">
+                        <CardContent className="p-0">
+                          {article ? (
+                            <div className="p-4 space-y-4">
+                              {/* Action badge and meta info */}
+                              <div className="flex items-center justify-between gap-2">
+                                <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
                                   ❤️ Liked
                                 </Badge>
-                                <div className="flex items-center gap-2 text-xs text-muted-foreground min-w-0">
-                                  <span className="truncate">{action.feedName || 'Unknown feed'}</span>
-                                  <span>•</span>
-                                  <span className="flex-shrink-0">{formatTimeAgo(new Date(action.timestamp).toISOString())}</span>
+                                <div className="text-xs text-muted-foreground">
+                                  {formatTimeAgo(new Date(action.timestamp).toISOString())}
                                 </div>
                               </div>
                               
-                              {article ? (
-                                <div className="bg-green-50 dark:bg-green-950/20 rounded-lg p-4 border border-green-200 dark:border-green-800 space-y-3">
-                                  <h3 className="font-semibold text-sm line-clamp-2 leading-relaxed text-green-900 dark:text-green-100">
-                                    {article.title}
-                                  </h3>
-                                  <p className="text-sm text-green-700 dark:text-green-300 line-clamp-3 leading-relaxed">
-                                    {article.description}
-                                  </p>
-                                  <div className="flex items-center justify-between pt-2">
-                                    <div className="flex items-center gap-2 text-xs text-green-600 dark:text-green-400">
-                                      {article.author && article.author.length > 0 && (
-                                        <>
-                                          <span>by {article.author[0].name}</span>
-                                          <span>•</span>
-                                        </>
-                                      )}
-                                      <span>{new Date(article.date).toLocaleDateString()}</span>
-                                    </div>
-                                    <Button 
-                                      variant="outline" 
-                                      size="sm" 
-                                      className="h-6 text-xs border-green-300 text-green-700 hover:bg-green-100"
-                                      onClick={() => window.open(article.link, '_blank')}
-                                    >
-                                      Read →
-                                    </Button>
+                              {/* Article card similar to swipe cards */}
+                              <div className="border border-green-200 dark:border-green-800 rounded-lg p-4 bg-green-50/50 dark:bg-green-950/20 hover:bg-green-50 dark:hover:bg-green-950/30 transition-colors">
+                                <h3 className="font-headline font-bold text-lg leading-tight mb-3 line-clamp-2">
+                                  {article.title}
+                                </h3>
+                                
+                                <p className="text-muted-foreground text-sm leading-relaxed mb-4 line-clamp-3">
+                                  {article.description}
+                                </p>
+                                
+                                <div className="flex items-center justify-between pt-3 border-t border-green-200 dark:border-green-800">
+                                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                    <span className="font-medium">{action.feedName || 'Unknown feed'}</span>
+                                    {article.author && article.author.length > 0 && (
+                                      <>
+                                        <span>•</span>
+                                        <span>by {article.author[0].name}</span>
+                                      </>
+                                    )}
+                                    <span>•</span>
+                                    <span>{new Date(article.date).toLocaleDateString()}</span>
                                   </div>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="h-7 text-xs px-3 border-green-300 hover:bg-green-100 dark:border-green-700 dark:hover:bg-green-900"
+                                    onClick={() => window.open(article.link, '_blank')}
+                                  >
+                                    Read Article
+                                  </Button>
                                 </div>
-                              ) : (
-                                <div className="bg-green-50 dark:bg-green-950/20 rounded-lg p-3 border border-green-200 dark:border-green-800">
-                                  <div className="flex items-start gap-3">
-                                    <div className="w-2 h-2 rounded-full bg-green-600 mt-2 flex-shrink-0"></div>
-                                    <div className="flex-1 min-w-0">
-                                      <p className="text-sm text-green-700 dark:text-green-300 mb-1">Liked Article</p>
-                                      <p className="text-xs font-mono text-green-600 dark:text-green-400 truncate">ID: {action.itemId}</p>
-                                      <p className="text-sm mt-2 text-green-800 dark:text-green-200">
-                                        You loved this article from {action.feedName || 'an unknown feed'}.
-                                      </p>
-                                    </div>
-                                  </div>
-                                </div>
-                              )}
+                              </div>
                             </div>
-                          </div>
+                          ) : (
+                            <div className="p-4">
+                              <div className="flex items-center justify-between gap-2 mb-3">
+                                <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
+                                  ❤️ Liked
+                                </Badge>
+                                <div className="text-xs text-muted-foreground">
+                                  {formatTimeAgo(new Date(action.timestamp).toISOString())}
+                                </div>
+                              </div>
+                              
+                              <div className="bg-green-50/50 dark:bg-green-950/20 rounded-lg p-4 border border-dashed border-green-200 dark:border-green-800">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-3 h-3 rounded-full bg-green-400"></div>
+                                  <div>
+                                    <p className="text-sm text-muted-foreground mb-1">Liked article no longer available</p>
+                                    <p className="text-xs text-muted-foreground/70">From: {action.feedName || 'Unknown feed'}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </CardContent>
                       </Card>
                     );
                   })}
                   {likedActions.length === 0 && (
                     <div className="text-center py-8 text-muted-foreground">
-                      No liked articles yet. Like articles to see them here!
+                      No liked articles yet. Like some articles to see them here!
                     </div>
                   )}
                 </div>
@@ -452,65 +491,75 @@ export function ProfilePage() {
                   {skippedActions.map(action => {
                     const article = getArticleFromAction(action);
                     return (
-                      <Card key={action.itemId} className="overflow-hidden">
-                        <CardContent className="p-4">
-                          <div className="flex justify-between items-start gap-4">
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-3">
-                                <Badge variant="secondary" className="flex-shrink-0">
+                      <Card key={action.itemId} className="overflow-hidden border-muted hover:shadow-md transition-shadow">
+                        <CardContent className="p-0">
+                          {article ? (
+                            <div className="p-4 space-y-4">
+                              {/* Action badge and meta info */}
+                              <div className="flex items-center justify-between gap-2">
+                                <Badge variant="secondary">
                                   👎 Skipped
                                 </Badge>
-                                <div className="flex items-center gap-2 text-xs text-muted-foreground min-w-0">
-                                  <span className="truncate">{action.feedName || 'Unknown feed'}</span>
-                                  <span>•</span>
-                                  <span className="flex-shrink-0">{formatTimeAgo(new Date(action.timestamp).toISOString())}</span>
+                                <div className="text-xs text-muted-foreground">
+                                  {formatTimeAgo(new Date(action.timestamp).toISOString())}
                                 </div>
                               </div>
                               
-                              {article ? (
-                                <div className="bg-muted/30 rounded-lg p-4 border border-muted space-y-3">
-                                  <h3 className="font-semibold text-sm line-clamp-2 leading-relaxed text-muted-foreground">
-                                    {article.title}
-                                  </h3>
-                                  <p className="text-sm text-muted-foreground/80 line-clamp-3 leading-relaxed">
-                                    {article.description}
-                                  </p>
-                                  <div className="flex items-center justify-between pt-2">
-                                    <div className="flex items-center gap-2 text-xs text-muted-foreground/60">
-                                      {article.author && article.author.length > 0 && (
-                                        <>
-                                          <span>by {article.author[0].name}</span>
-                                          <span>•</span>
-                                        </>
-                                      )}
-                                      <span>{new Date(article.date).toLocaleDateString()}</span>
-                                    </div>
-                                    <Button 
-                                      variant="ghost" 
-                                      size="sm" 
-                                      className="h-6 text-xs text-muted-foreground"
-                                      onClick={() => window.open(article.link, '_blank')}
-                                    >
-                                      Read →
-                                    </Button>
+                              {/* Article card similar to swipe cards */}
+                              <div className="border border-muted rounded-lg p-4 bg-muted/20 hover:bg-muted/30 transition-colors">
+                                <h3 className="font-headline font-bold text-lg leading-tight mb-3 line-clamp-2 text-muted-foreground">
+                                  {article.title}
+                                </h3>
+                                
+                                <p className="text-muted-foreground text-sm leading-relaxed mb-4 line-clamp-3 opacity-75">
+                                  {article.description}
+                                </p>
+                                
+                                <div className="flex items-center justify-between pt-3 border-t border-muted">
+                                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                    <span className="font-medium">{action.feedName || 'Unknown feed'}</span>
+                                    {article.author && article.author.length > 0 && (
+                                      <>
+                                        <span>•</span>
+                                        <span>by {article.author[0].name}</span>
+                                      </>
+                                    )}
+                                    <span>•</span>
+                                    <span>{new Date(article.date).toLocaleDateString()}</span>
                                   </div>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="h-7 text-xs px-3 text-muted-foreground hover:text-foreground"
+                                    onClick={() => window.open(article.link, '_blank')}
+                                  >
+                                    Read Article
+                                  </Button>
                                 </div>
-                              ) : (
-                                <div className="bg-muted/30 rounded-lg p-3 border border-muted">
-                                  <div className="flex items-start gap-3">
-                                    <div className="w-2 h-2 rounded-full bg-muted-foreground mt-2 flex-shrink-0"></div>
-                                    <div className="flex-1 min-w-0">
-                                      <p className="text-sm text-muted-foreground mb-1">Skipped Article</p>
-                                      <p className="text-xs font-mono text-muted-foreground/80 truncate">ID: {action.itemId}</p>
-                                      <p className="text-sm mt-2 text-muted-foreground">
-                                        You skipped this article from {action.feedName || 'an unknown feed'}.
-                                      </p>
-                                    </div>
-                                  </div>
-                                </div>
-                              )}
+                              </div>
                             </div>
-                          </div>
+                          ) : (
+                            <div className="p-4">
+                              <div className="flex items-center justify-between gap-2 mb-3">
+                                <Badge variant="secondary">
+                                  👎 Skipped
+                                </Badge>
+                                <div className="text-xs text-muted-foreground">
+                                  {formatTimeAgo(new Date(action.timestamp).toISOString())}
+                                </div>
+                              </div>
+                              
+                              <div className="bg-muted/20 rounded-lg p-4 border border-dashed border-muted">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-3 h-3 rounded-full bg-muted-foreground/50"></div>
+                                  <div>
+                                    <p className="text-sm text-muted-foreground mb-1">Skipped article no longer available</p>
+                                    <p className="text-xs text-muted-foreground/70">From: {action.feedName || 'Unknown feed'}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </CardContent>
                       </Card>
                     );
