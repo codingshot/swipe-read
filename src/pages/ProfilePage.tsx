@@ -20,7 +20,8 @@ export function ProfilePage() {
     readItems,
     swipeActions,
     dailyGoal,
-    changeDailyGoal
+    changeDailyGoal,
+    allArticles
   } = useNewsData('all');
 
   // Settings state
@@ -46,13 +47,28 @@ export function ProfilePage() {
     return selectedFeedIds.includes(feed.id);
   });
 
-  // Calculate daily stats manually
-  const today = new Date().toDateString();
-  const dailyStats = {
-    articlesRead: swipeActions.filter(action => 
-      new Date(action.timestamp).toDateString() === today
-    ).length
+  // Calculate daily reading history
+  const getDailyHistory = () => {
+    const days: { [date: string]: { count: number; goalMet: boolean; actions: SwipeAction[] } } = {};
+    
+    swipeActions.forEach(action => {
+      const date = new Date(action.timestamp).toDateString();
+      if (!days[date]) {
+        days[date] = { count: 0, goalMet: false, actions: [] };
+      }
+      days[date].count++;
+      days[date].actions.push(action);
+      days[date].goalMet = days[date].count >= dailyGoal;
+    });
+    
+    return Object.entries(days)
+      .sort(([a], [b]) => new Date(b).getTime() - new Date(a).getTime())
+      .slice(0, 7); // Last 7 days
   };
+
+  const dailyHistory = getDailyHistory();
+  const today = new Date().toDateString();
+  const todayStats = dailyHistory.find(([date]) => date === today)?.[1] || { count: 0, goalMet: false, actions: [] };
 
   // Get feed statistics
   const getFeedStats = () => {
@@ -116,7 +132,12 @@ export function ProfilePage() {
     return swipeActions.find(action => action.itemId === articleId);
   };
 
-  // Filter swipe actions instead of articles for now
+  // Get articles with their swipe actions
+  const getArticleFromAction = (action: SwipeAction) => {
+    return allArticles.find(article => article.id === action.itemId);
+  };
+
+  // Filter swipe actions by type
   const likedActions = swipeActions.filter(action => action.action === 'like');
   const skippedActions = swipeActions.filter(action => action.action === 'dismiss');
 
@@ -195,23 +216,44 @@ export function ProfilePage() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg">Daily Goal</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-blue-600">{dailyStats.articlesRead}/{dailyGoal}</div>
-                <p className="text-sm text-muted-foreground">Articles today</p>
-                {topFeeds.length > 0 && (
+                <CardContent>
+                  <div className="text-3xl font-bold text-blue-600">{todayStats.count}/{dailyGoal}</div>
+                  <p className="text-sm text-muted-foreground">
+                    Articles today {todayStats.goalMet ? '🎯' : ''}
+                  </p>
+                  
+                  {/* Daily Progress */}
                   <div className="mt-3 pt-3 border-t border-border">
-                    <p className="text-xs text-muted-foreground mb-2">Top feeds:</p>
+                    <p className="text-xs text-muted-foreground mb-2">Last 7 days:</p>
                     <div className="space-y-1">
-                      {topFeeds.map(({ feedName, count }) => (
-                        <div key={feedName} className="flex justify-between text-xs">
-                          <span className="truncate">{feedName}</span>
-                          <span className="font-medium">{count}</span>
+                      {dailyHistory.map(([date, stats]) => (
+                        <div key={date} className="flex justify-between text-xs items-center">
+                          <span className="truncate">
+                            {new Date(date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                          </span>
+                          <div className="flex items-center gap-1">
+                            <span className="font-medium">{stats.count}/{dailyGoal}</span>
+                            {stats.goalMet && <span className="text-green-600">✓</span>}
+                          </div>
                         </div>
                       ))}
                     </div>
                   </div>
-                )}
-              </CardContent>
+                  
+                  {topFeeds.length > 0 && (
+                    <div className="mt-3 pt-3 border-t border-border">
+                      <p className="text-xs text-muted-foreground mb-2">Top feeds (all time):</p>
+                      <div className="space-y-1">
+                        {topFeeds.map(({ feedName, count }) => (
+                          <div key={feedName} className="flex justify-between text-xs">
+                            <span className="truncate">{feedName}</span>
+                            <span className="font-medium">{count}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
             </Card>
             </div>
 
@@ -246,50 +288,81 @@ export function ProfilePage() {
 
               <TabsContent value="all">
                 <div className="space-y-4">
-                  {swipeActions.map(action => (
-                    <Card key={action.itemId} className="overflow-hidden">
-                      <CardContent className="p-4">
-                        <div className="flex justify-between items-start gap-4">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-2">
-                              {action.action === 'like' && (
-                                <Badge variant="default" className="bg-green-100 text-green-800 flex-shrink-0">
-                                  ❤️ Liked
-                                </Badge>
-                              )}
-                              {action.action === 'dismiss' && (
-                                <Badge variant="secondary" className="flex-shrink-0">
-                                  👎 Skipped
-                                </Badge>
-                              )}
-                              {action.action === 'bookmark' && (
-                                <Badge variant="outline" className="flex-shrink-0">
-                                  🔖 Saved
-                                </Badge>
-                              )}
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground min-w-0">
-                                <span className="truncate">{action.feedName || 'Unknown feed'}</span>
-                                <span>•</span>
-                                <span className="flex-shrink-0">{formatTimeAgo(new Date(action.timestamp).toISOString())}</span>
-                              </div>
-                            </div>
-                            <div className="bg-muted/50 rounded-lg p-3 border">
-                              <div className="flex items-start gap-3">
-                                <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0"></div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-sm text-muted-foreground mb-1">Article Preview</p>
-                                  <p className="text-xs font-mono text-muted-foreground/80 truncate">ID: {action.itemId}</p>
-                                  <p className="text-sm mt-2 text-foreground">
-                                    This article was {action.action === 'like' ? 'liked' : action.action === 'dismiss' ? 'skipped' : 'bookmarked'} from {action.feedName || 'an unknown feed'}.
-                                  </p>
+                  {swipeActions.map(action => {
+                    const article = getArticleFromAction(action);
+                    return (
+                      <Card key={action.itemId} className="overflow-hidden">
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-start gap-4">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-3">
+                                {action.action === 'like' && (
+                                  <Badge variant="default" className="bg-green-100 text-green-800 flex-shrink-0">
+                                    ❤️ Liked
+                                  </Badge>
+                                )}
+                                {action.action === 'dismiss' && (
+                                  <Badge variant="secondary" className="flex-shrink-0">
+                                    👎 Skipped
+                                  </Badge>
+                                )}
+                                {action.action === 'bookmark' && (
+                                  <Badge variant="outline" className="flex-shrink-0">
+                                    🔖 Saved
+                                  </Badge>
+                                )}
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground min-w-0">
+                                  <span className="truncate">{action.feedName || 'Unknown feed'}</span>
+                                  <span>•</span>
+                                  <span className="flex-shrink-0">{formatTimeAgo(new Date(action.timestamp).toISOString())}</span>
                                 </div>
                               </div>
+                              
+                              {article ? (
+                                <div className="bg-background border rounded-lg p-4 space-y-3">
+                                  <h3 className="font-semibold text-sm line-clamp-2 leading-relaxed">
+                                    {article.title}
+                                  </h3>
+                                  <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
+                                    {article.description}
+                                  </p>
+                                  <div className="flex items-center justify-between pt-2">
+                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                      {article.author && article.author.length > 0 && (
+                                        <>
+                                          <span>by {article.author[0].name}</span>
+                                          <span>•</span>
+                                        </>
+                                      )}
+                                      <span>{new Date(article.date).toLocaleDateString()}</span>
+                                    </div>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="sm" 
+                                      className="h-6 text-xs"
+                                      onClick={() => window.open(article.link, '_blank')}
+                                    >
+                                      Read →
+                                    </Button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="bg-muted/50 rounded-lg p-3 border">
+                                  <div className="flex items-start gap-3">
+                                    <div className="w-2 h-2 rounded-full bg-muted-foreground mt-2 flex-shrink-0"></div>
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-sm text-muted-foreground mb-1">Article no longer available</p>
+                                      <p className="text-xs font-mono text-muted-foreground/80 truncate">ID: {action.itemId}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
                   {swipeActions.length === 0 && (
                     <div className="text-center py-8 text-muted-foreground">
                       No articles read yet. Start reading to see your history!
@@ -300,38 +373,72 @@ export function ProfilePage() {
 
               <TabsContent value="liked">
                 <div className="space-y-4">
-                  {likedActions.map(action => (
-                    <Card key={action.itemId} className="overflow-hidden">
-                      <CardContent className="p-4">
-                        <div className="flex justify-between items-start gap-4">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-2">
-                              <Badge variant="default" className="bg-green-100 text-green-800 flex-shrink-0">
-                                ❤️ Liked
-                              </Badge>
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground min-w-0">
-                                <span className="truncate">{action.feedName || 'Unknown feed'}</span>
-                                <span>•</span>
-                                <span className="flex-shrink-0">{formatTimeAgo(new Date(action.timestamp).toISOString())}</span>
-                              </div>
-                            </div>
-                            <div className="bg-green-50 dark:bg-green-950/20 rounded-lg p-3 border border-green-200 dark:border-green-800">
-                              <div className="flex items-start gap-3">
-                                <div className="w-2 h-2 rounded-full bg-green-600 mt-2 flex-shrink-0"></div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-sm text-green-700 dark:text-green-300 mb-1">Liked Article</p>
-                                  <p className="text-xs font-mono text-green-600 dark:text-green-400 truncate">ID: {action.itemId}</p>
-                                  <p className="text-sm mt-2 text-green-800 dark:text-green-200">
-                                    You loved this article from {action.feedName || 'an unknown feed'}. Great content!
-                                  </p>
+                  {likedActions.map(action => {
+                    const article = getArticleFromAction(action);
+                    return (
+                      <Card key={action.itemId} className="overflow-hidden border-green-200 dark:border-green-800">
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-start gap-4">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-3">
+                                <Badge variant="default" className="bg-green-100 text-green-800 flex-shrink-0">
+                                  ❤️ Liked
+                                </Badge>
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground min-w-0">
+                                  <span className="truncate">{action.feedName || 'Unknown feed'}</span>
+                                  <span>•</span>
+                                  <span className="flex-shrink-0">{formatTimeAgo(new Date(action.timestamp).toISOString())}</span>
                                 </div>
                               </div>
+                              
+                              {article ? (
+                                <div className="bg-green-50 dark:bg-green-950/20 rounded-lg p-4 border border-green-200 dark:border-green-800 space-y-3">
+                                  <h3 className="font-semibold text-sm line-clamp-2 leading-relaxed text-green-900 dark:text-green-100">
+                                    {article.title}
+                                  </h3>
+                                  <p className="text-sm text-green-700 dark:text-green-300 line-clamp-3 leading-relaxed">
+                                    {article.description}
+                                  </p>
+                                  <div className="flex items-center justify-between pt-2">
+                                    <div className="flex items-center gap-2 text-xs text-green-600 dark:text-green-400">
+                                      {article.author && article.author.length > 0 && (
+                                        <>
+                                          <span>by {article.author[0].name}</span>
+                                          <span>•</span>
+                                        </>
+                                      )}
+                                      <span>{new Date(article.date).toLocaleDateString()}</span>
+                                    </div>
+                                    <Button 
+                                      variant="outline" 
+                                      size="sm" 
+                                      className="h-6 text-xs border-green-300 text-green-700 hover:bg-green-100"
+                                      onClick={() => window.open(article.link, '_blank')}
+                                    >
+                                      Read →
+                                    </Button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="bg-green-50 dark:bg-green-950/20 rounded-lg p-3 border border-green-200 dark:border-green-800">
+                                  <div className="flex items-start gap-3">
+                                    <div className="w-2 h-2 rounded-full bg-green-600 mt-2 flex-shrink-0"></div>
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-sm text-green-700 dark:text-green-300 mb-1">Liked Article</p>
+                                      <p className="text-xs font-mono text-green-600 dark:text-green-400 truncate">ID: {action.itemId}</p>
+                                      <p className="text-sm mt-2 text-green-800 dark:text-green-200">
+                                        You loved this article from {action.feedName || 'an unknown feed'}.
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
                   {likedActions.length === 0 && (
                     <div className="text-center py-8 text-muted-foreground">
                       No liked articles yet. Like articles to see them here!
@@ -342,38 +449,72 @@ export function ProfilePage() {
 
               <TabsContent value="skipped">
                 <div className="space-y-4">
-                  {skippedActions.map(action => (
-                    <Card key={action.itemId} className="overflow-hidden">
-                      <CardContent className="p-4">
-                        <div className="flex justify-between items-start gap-4">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-2">
-                              <Badge variant="secondary" className="flex-shrink-0">
-                                👎 Skipped
-                              </Badge>
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground min-w-0">
-                                <span className="truncate">{action.feedName || 'Unknown feed'}</span>
-                                <span>•</span>
-                                <span className="flex-shrink-0">{formatTimeAgo(new Date(action.timestamp).toISOString())}</span>
-                              </div>
-                            </div>
-                            <div className="bg-muted/30 rounded-lg p-3 border border-muted">
-                              <div className="flex items-start gap-3">
-                                <div className="w-2 h-2 rounded-full bg-muted-foreground mt-2 flex-shrink-0"></div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-sm text-muted-foreground mb-1">Skipped Article</p>
-                                  <p className="text-xs font-mono text-muted-foreground/80 truncate">ID: {action.itemId}</p>
-                                  <p className="text-sm mt-2 text-muted-foreground">
-                                    You skipped this article from {action.feedName || 'an unknown feed'}. No worries!
-                                  </p>
+                  {skippedActions.map(action => {
+                    const article = getArticleFromAction(action);
+                    return (
+                      <Card key={action.itemId} className="overflow-hidden">
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-start gap-4">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-3">
+                                <Badge variant="secondary" className="flex-shrink-0">
+                                  👎 Skipped
+                                </Badge>
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground min-w-0">
+                                  <span className="truncate">{action.feedName || 'Unknown feed'}</span>
+                                  <span>•</span>
+                                  <span className="flex-shrink-0">{formatTimeAgo(new Date(action.timestamp).toISOString())}</span>
                                 </div>
                               </div>
+                              
+                              {article ? (
+                                <div className="bg-muted/30 rounded-lg p-4 border border-muted space-y-3">
+                                  <h3 className="font-semibold text-sm line-clamp-2 leading-relaxed text-muted-foreground">
+                                    {article.title}
+                                  </h3>
+                                  <p className="text-sm text-muted-foreground/80 line-clamp-3 leading-relaxed">
+                                    {article.description}
+                                  </p>
+                                  <div className="flex items-center justify-between pt-2">
+                                    <div className="flex items-center gap-2 text-xs text-muted-foreground/60">
+                                      {article.author && article.author.length > 0 && (
+                                        <>
+                                          <span>by {article.author[0].name}</span>
+                                          <span>•</span>
+                                        </>
+                                      )}
+                                      <span>{new Date(article.date).toLocaleDateString()}</span>
+                                    </div>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="sm" 
+                                      className="h-6 text-xs text-muted-foreground"
+                                      onClick={() => window.open(article.link, '_blank')}
+                                    >
+                                      Read →
+                                    </Button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="bg-muted/30 rounded-lg p-3 border border-muted">
+                                  <div className="flex items-start gap-3">
+                                    <div className="w-2 h-2 rounded-full bg-muted-foreground mt-2 flex-shrink-0"></div>
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-sm text-muted-foreground mb-1">Skipped Article</p>
+                                      <p className="text-xs font-mono text-muted-foreground/80 truncate">ID: {action.itemId}</p>
+                                      <p className="text-sm mt-2 text-muted-foreground">
+                                        You skipped this article from {action.feedName || 'an unknown feed'}.
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
                   {skippedActions.length === 0 && (
                     <div className="text-center py-8 text-muted-foreground">
                       No skipped articles yet.
